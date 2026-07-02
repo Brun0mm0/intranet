@@ -1,43 +1,49 @@
 import {Box, CssBaseline, Stack} from '@mui/material';
-import {alpha} from '@mui/material/styles';
-import { Outlet } from 'react-router-dom';
-
+import { Outlet, useLocation } from 'react-router-dom';
 import AppNavbar from '../components/AppNavbar';
-import SideMenu from '../components/SideMenu';
-import Header from '../components/Header';
+import SideMenu from '../components/SideMenu/SideMenu';
 import AppTheme from '../shared-theme/AppTheme';
+import { useAuth } from '../auth';
+import Header from '../components/header/Header';
+import { ChatBotContainer } from '../components/chatBot/ChatBotContainer';
 
 export default function DashboardLayout({themeComponents}) {
+    const {user, loading} = useAuth();
+    const location = useLocation();
+
+    if (loading) { return <div>Loading...</div>; } 
+
     return (
-        <AppTheme themeComponents={themeComponents}>
+        <AppTheme themeComponents={themeComponents} >
             <CssBaseline enableColorScheme />
             <Box sx={{ display: 'flex'}}>
-                <SideMenu />
+                <SideMenu usuario={user?.usuario}/>
                 <AppNavbar />
                 <Box
                     component="main"
                     sx={(theme) => ({
                         flexGrow: 1,
-                        backgroundColor: theme.vars
-                        ? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
-                        : alpha(theme.palette.background.default, 1),
-                    overflow: 'auto',
+                        height: '100dvh',
+                        backgroundImage:"linear-gradient(345deg, rgba(0,169,218,.5) 0%, rgba(175,218,237,0.3) 25%, rgba(175,218,237,0.3) 75%, rgba(2,181,126,.5) 100%)",   
+                        overflow: 'auto',
                     })}
                 >
                     <Stack
                       spacing={1}
                       sx={{
                         alignItems: 'center',
-                        mx: 3,
-                        pb: 5,
+                        height: '100%',
+                        mx: 2,
+                        pb: 1,
                         mt: {xs: 8, md: 0}
                       }}
                     >
                         <Header />
-                        <Outlet />
+                            <Outlet />
                     </Stack>                        
                 </Box>
-            </Box> 
+            </Box>
+            {/* <ChatBotContainer />  */}
         </AppTheme>
     );
 }

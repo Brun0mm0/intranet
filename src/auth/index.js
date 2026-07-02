@@ -3,7 +3,6 @@
  * Do not modify this file directly.
  */
 
-export * from './AuthContext'
 export * from './LoginPage'
 export * from './ProtectedRoute'
 export * from './useAuth'

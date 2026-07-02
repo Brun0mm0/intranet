@@ -7,7 +7,7 @@ import { dataDisplayCustomizations } from './customizations/dataDisplay';
 import { feedbackCustomizations } from './customizations/feedback';
 import { navigationCustomizations } from './customizations/navigation';
 import { surfacesCustomizations } from './customizations/surfaces';
-import { colorSchemes, typography, shadows, shape } from './themePrimitives';
+import { typography, shadows, shape } from './themePrimitives';
 
 function AppTheme(props) {
   const { children, disableCustomTheme, themeComponents } = props;
@@ -16,11 +16,10 @@ function AppTheme(props) {
       ? {}
       : createTheme({
           // For more details about CSS variables configuration, see https://mui.com/material-ui/customization/css-theme-variables/configuration/
-          cssVariables: {
-            colorSchemeSelector: 'data-mui-color-scheme',
-            cssVarPrefix: 'template',
+          
+          palette: {
+            mode: 'light', // Default mode, can be overridden by ColorModeIconDropdown
           },
-          colorSchemes, // Recently added in v6 for building light & dark mode app, see https://mui.com/material-ui/customization/palette/#color-schemes
           typography,
           shadows,
           shape,

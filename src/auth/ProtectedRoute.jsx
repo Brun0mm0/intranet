@@ -4,4 +4,5 @@ export default function ProtectedRoute({children}) {
     const isAuthenticated = true
     
     return isAuthenticated ? children : <Navigate to='/login' replace /> 
+    // return children
 } 

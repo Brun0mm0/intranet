@@ -1,33 +1,57 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { routes } from './routerConfig';
-import LoginPage from '../auth/LoginPage';
-import ProtectedRoute from './ProtecetedRoute'
-import NotFoundPage from '../pages/NotFoundPage'
+import ProtectedRoute from './ProtectedRoute';
+import NotFoundPage from '../pages/NotFoundPage';
 
-const renderRoutes = (routes) => 
-  routes.map(({ path, component: Component, protected: isProtected ,children }, i) => {
+const renderRoutes = (routesToRender) => 
+  routesToRender.map(
+    (
+      { path, 
+        component: Component, 
+        protected: isProtected, 
+        children, 
+        roles,
+        redirectTo}, 
+        i
+      ) => {
+    
+    // ✅ manejar redirección
+    if (redirectTo) {
+      return(
+        <Route
+        key={path || `route-${i}`}
+        path={path}
+        element={<Navigate to={redirectTo} replace />}
+        />
+      )
+    };
+
     const element = isProtected ? (
-        <ProtectedRoute>
-            <Component />
-        </ProtectedRoute>
-    )  : (
+      <ProtectedRoute roles={roles}>
         <Component />
-    );   
-        return (
-            <Route key={i} path={path} element={<Component />}>
-      {children &&
-        children.map(({ path: childPath, component: ChildComponent }, j) => (
-            <Route key={j} path={childPath} element={<ChildComponent />} />
-        ))}
-    </Route>
+      </ProtectedRoute>
+    ) : (
+      <Component />
     );
-});
+
+    // Si tiene hijos, renderizar la ruta con anidación
+    if (children?.length > 0) {
+      return (
+        <Route key={path || `route-${i}`} path={path} element={element}>
+          {renderRoutes(children)}
+        </Route>
+      );
+    }
+
+    // Ruta sin hijos
+    return <Route key={path || `route-${i}`} path={path} element={element} />;
+  });
 
 export default function AppRouter() {
-    return(
-      <Routes>
-        {renderRoutes(routes)}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    )
+  return (
+    <Routes>
+      {renderRoutes(routes)}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
 }

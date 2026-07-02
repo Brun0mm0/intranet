@@ -70,21 +70,21 @@ export const inputsCustomizations = {
               '&:active': {
                 backgroundColor: gray[800],
               },
-              ...theme.applyStyles('dark', {
-                color: 'black',
-                backgroundColor: gray[50],
-                backgroundImage: `linear-gradient(to bottom, ${gray[100]}, ${gray[50]})`,
-                boxShadow: 'inset 0 -1px 0  hsl(220, 30%, 80%)',
-                border: `1px solid ${gray[50]}`,
-                '&:hover': {
-                  backgroundImage: 'none',
-                  backgroundColor: gray[300],
-                  boxShadow: 'none',
-                },
-                '&:active': {
-                  backgroundColor: gray[400],
-                },
-              }),
+              // ...theme.applyStyles('dark', {
+              //   color: 'black',
+              //   backgroundColor: gray[50],
+              //   backgroundImage: `linear-gradient(to bottom, ${gray[100]}, ${gray[50]})`,
+              //   boxShadow: 'inset 0 -1px 0  hsl(220, 30%, 80%)',
+              //   border: `1px solid ${gray[50]}`,
+              //   '&:hover': {
+              //     backgroundImage: 'none',
+              //     backgroundColor: gray[300],
+              //     boxShadow: 'none',
+              //   },
+              //   '&:active': {
+              //     backgroundColor: gray[400],
+              //   },
+              // }),
             },
           },
           {
