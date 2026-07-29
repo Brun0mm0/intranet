@@ -9,6 +9,8 @@ import MedicalInformationIcon from '@mui/icons-material/MedicalInformation';
 import GroupsIcon from '@mui/icons-material/Groups';
 import { PrestacionesPage } from '../pages/Prestaciones/PrestacionesPage';
 import PlagiarismRoundedIcon from '@mui/icons-material/PlagiarismRounded';
+import ForwardToInboxRoundedIcon from '@mui/icons-material/ForwardToInboxRounded';
+import { AvisoPagoPage } from '../pages/AvisoPago/AvisoPagoPage';
 // import PaginaCrearUsuario from '../auth/PaginaCrearUsuario';
 
 
@@ -60,6 +62,15 @@ export const routes = [
         icon: AdminPanelSettingsIcon,
         showInMenu: true
       },
+      {
+        path: 'aviso-pago',
+        component: AvisoPagoPage,
+        protected: true,
+        roles: [1,8],
+        label: 'Aviso de Pago',
+        icon: ForwardToInboxRoundedIcon,
+        showInMenu: true,
+      }
     ],
   },
 ];

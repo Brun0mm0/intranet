@@ -1,47 +1,46 @@
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Box, Popover, Typography} from "@mui/material";
-import { useState, useEffect } from "react";
-import { PadronesHistorial } from "./PadronesHistorial";
+import { Box } from "@mui/material";
+import { useEffect, useState } from "react";
 import { getColumns } from "../Columns";
 import { estaVigente } from "../../../utils/utils";
 
-export default function PadronesList({ 
-  rows = [], 
-  onInfoClick, 
-  loading, 
-  fetchAportes, 
-  onPrintConsulta}) {
+export default function PadronesList({
+  rows = [],
+  onInfoClick,
+  loading,
+  fetchAportes,
+  onPrintConsulta,
+  onVerGrupoFamiliar,
+}) {
 
   useEffect(() => {
     setFilterModel({ items: [] });
   }, [rows]);
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [historial, setHistorial] = useState([]);
-  const [filterModel, setFilterModel] = useState({ items:[]})
+  const [filterModel, setFilterModel] = useState({ items: [] });
 
-  // 🔹 Manejo popover historial
-  const handleClick = (event, row) => {
-    setAnchorEl(event.currentTarget)
-    setHistorial(row.historial_coberturas || []);
-  };
-
-  const handleClose = () => setAnchorEl(null);
-
-  // 🔹 Generación de columnas (externo)
+  // ✅ Antes: `variant: rows.length > 1 ? "full" : "simple"` hacía que
+  // las columnas de acción (ver/aportes/vigencia) aparecieran o no según
+  // la cantidad de resultados. Ahora las columnas son siempre las mismas.
+  // ✅ Antes: cada columna definía su propia alineación (o ninguna).
+  // Ahora se centra header y celdas para todas de una sola vez, salvo que
+  // una columna puntual ya lo haya definido explícitamente.
   const columns = getColumns({
-    variant: rows.length > 1 ? "full" : "simple",
     onPrintConsulta,
-    handleClick,
     onInfoClick,
-    fetchAportes
-  })
+    fetchAportes,
+    onVerGrupoFamiliar,
+  }).map((col) => ({
+    align: "center",
+    headerAlign: "center",
+    ...col,
+  }));
 
   // 🔹 Asegurar id único para DataGrid
   const rowsConId = rows.map((row, index) => ({
     id: row.id ?? index,
-    ...row
-  }))
+    ...row,
+  }));
 
   return (
     <Box
@@ -49,18 +48,17 @@ export default function PadronesList({
         flexGrow: 1,
         display: "flex",
         alignItems: "center",
+        justifyContent: "center",
         width: "100%",
         height: "100%",
         flexDirection: "column",
-        // padding: 1,
-        // paddingY: 2
       }}
     >
       <DataGrid
         density="compact"
+        disableColumnMenu
         filterModel={filterModel}
-        onFilterModelChange={(model)=> setFilterModel(model)}
-        disableSelectionOnClick
+        onFilterModelChange={(model) => setFilterModel(model)}
         rows={rowsConId}
         columns={columns}
         loading={loading}
@@ -83,34 +81,19 @@ export default function PadronesList({
           height: "100%",
           "& .fila-activa": {
             backgroundColor: "#bddab180",
-          "&:hover": {
-            backgroundColor: "#bddab1",
-          },
+            "&:hover": {
+              backgroundColor: "#bddab1",
+            },
           },
           "& .fila-baja": {
             backgroundColor: "#dab1b180",
-          "&:hover": {
-            backgroundColor: "#dab1b1",
-          },
+            "&:hover": {
+              backgroundColor: "#dab1b1",
+            },
           },
           borderRadius: 2,
         }}
       />
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "left" }}
-      >
-        <Box p={2}>
-          {Array.isArray(historial) && historial.length > 0 ? (
-            <PadronesHistorial historial={historial} />
-          ) : (
-            <Typography>No hay historial</Typography>
-          )}
-        </Box>
-      </Popover>
     </Box>
   );
 }

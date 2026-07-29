@@ -1,257 +1,244 @@
-
 import CloseIcon from "@mui/icons-material/Close";
-import {ReadOnlyOutlinedField} from "../../../components/forms/ReadOnlyOutlinedField";
-import { 
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    Typography,
-    IconButton,
-    Box,
-    Stack,
-    TextField,
-    Grid
-    } from "@mui/material";
+import PrintOutlinedIcon from "@mui/icons-material/PrintOutlined";
+import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Typography,
+  IconButton,
+  Box,
+  CircularProgress,
+  Chip,
+  Button,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 
-
-
-export const AfiliadoView = ({ open, handleClose, data, shouldRenderField, historial }) => {
-
-const estaVigente = (fecha) => {
-  if (!fecha) return true;
-
-  // formato argentino DD/MM/YYYY
-  const [day, month, year] = fecha.split('/').map(Number);
-
-  const f = new Date(year, month - 1, day);
-  const hoy = new Date();
-
-  hoy.setHours(0, 0, 0, 0);
-  f.setHours(0, 0, 0, 0);
-
-  return f >= hoy;
+// 🔹 Par etiqueta/valor en texto plano.
+// ✅ Contraste: antes usaba "text.secondary" (gris muy claro) — ahora
+// grey.700 + bold, que se lee bien incluso a tamaño chico.
+function Field({ label, value }) {
+  return (
+    <Box>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "grey.700",
+          textTransform: "uppercase",
+          letterSpacing: "0.04em",
+          fontWeight: 700,
+          fontSize: "0.7rem",
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography variant="body2" sx={{ mt: 0.25, color: "text.primary" }}>
+        {value ?? "—"}
+      </Typography>
+    </Box>
+  );
 }
 
-  const historialFields = [
-  {
-    key: "plan_cober",
-    label: "Plan",
-    size: 6,
-  },
-  {
-    key: "motivo_baja",
-    label: "Motivo de baja",
-    size: 12,
-    hideIf: (item) => !item.motivo_baja,
-  },
-  {
-    key: "fecha_inicio_cober",
-    label: "Inicio cobertura",
-    size: 6,
-  },
-  {
-    key: "fecha_fin_cober",
-    label: "Fin cobertura",
-    size: 6,
-  },
-];
+function Section({ title, children }) {
+  return (
+    <Box
+      sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 2,
+        p: 2,
+        height: "100%",
+        bgcolor: "grey.50",
+      }}
+    >
+      <Typography variant="subtitle2" sx={{ mb: 1.5, color: "primary.dark", fontWeight: 700 }}>
+        {title}
+      </Typography>
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}>
+        {children}
+      </Box>
+    </Box>
+  );
+}
+
+function HistorialTabla({ historial }) {
+  if (!Array.isArray(historial) || historial.length === 0) {
+    return <Typography color="text.secondary">No hay historial de cobertura.</Typography>;
+  }
+
+  const ordenado = [...historial].reverse();
 
   return (
-     <Dialog maxWidth="xl" open={open} onClose={handleClose}>
-      <DialogTitle>
-        <Typography fontWeight={600} fontSize="1.2rem">
-          {data.Apellido}, {data.Nombre} - N°Afiliado: {data.Nro_Afil}
-        </Typography>
-        <IconButton
-          edge="end"
-          onClick={handleClose}
-          sx={{ position: "absolute", right: 20, top: 8 }}
-        >
-          <CloseIcon />
-        </IconButton>
+    <Table size="small">
+      <TableHead>
+        <TableRow>
+          <TableCell sx={{ fontWeight: 700 }}>Plan</TableCell>
+          <TableCell sx={{ fontWeight: 700 }}>Inicio</TableCell>
+          <TableCell sx={{ fontWeight: 700 }}>Fin</TableCell>
+          <TableCell sx={{ fontWeight: 700 }}>Motivo de baja</TableCell>
+          <TableCell align="right" sx={{ fontWeight: 700 }}>Estado</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {ordenado.map((item, index) => {
+          const vigente = !item.fecha_fin_cober;
+          return (
+            <TableRow key={index}>
+              <TableCell>{item.plan_cober}</TableCell>
+              <TableCell>{item.fecha_inicio_cober}</TableCell>
+              <TableCell>{item.fecha_fin_cober ?? "—"}</TableCell>
+              <TableCell>{item.motivo_baja ?? "—"}</TableCell>
+              <TableCell align="right">
+                <Chip
+                  label={vigente ? "Vigente" : "No vigente"}
+                  color={vigente ? "success" : "default"}
+                  size="small"
+                />
+              </TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
+}
+
+export const AfiliadoView = ({
+  open,
+  handleClose,
+  data,
+  loading,
+  historial,
+  onImprimir,
+  onVerAportes,
+}) => {
+
+  const estaVigente = (fecha) => {
+    if (!fecha) return true;
+    const [day, month, year] = fecha.split('/').map(Number);
+    const f = new Date(year, month - 1, day);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    f.setHours(0, 0, 0, 0);
+    return f >= hoy;
+  };
+
+  if (loading || !data) {
+    return (
+      <Dialog maxWidth="lg" fullWidth open={open} onClose={handleClose}>
+        <DialogTitle sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <IconButton onClick={handleClose}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={300}>
+            <CircularProgress />
+          </Box>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  const vigente = estaVigente(data.fecha_fin_cober);
+
+  return (
+    <Dialog maxWidth="lg" fullWidth open={open} onClose={handleClose}>
+      <DialogTitle sx={{ pb: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <Box>
+            <Typography variant="h6" fontWeight={700}>
+              {data.Apellido}, {data.Nombre}
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
+              <Typography variant="body2" color="text.secondary">
+                N° Afiliado {data.Nro_Afil}
+              </Typography>
+              <Chip
+                label={vigente ? "Vigente" : "No vigente"}
+                color={vigente ? "success" : "default"}
+                size="small"
+              />
+            </Box>
+          </Box>
+
+          <Stack direction="row" spacing={1} alignItems="center">
+            {/* ✅ Acciones agregadas al modal, antes solo disponibles desde
+                el menú de la fila en la grilla. */}
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<PrintOutlinedIcon />}
+              onClick={() => onImprimir?.(data)}
+            >
+              Imprimir
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<PriceCheckOutlinedIcon />}
+              onClick={() => {
+                // ✅ `data` acá siempre viene de fetchAfiliadoDetalle (consulta
+                // uno a uno por CUIL), así que Cuil_titular siempre trae el
+                // código de parentesco de 2 dígitos al final — se saca siempre.
+                const cuilBase = data.Cuil_titular ?? data.CUIL;
+                onVerAportes?.(cuilBase);
+              }}
+            >
+              Aportes
+            </Button>
+            <IconButton onClick={handleClose}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </Box>
       </DialogTitle>
 
       <DialogContent>
-        <Grid container spacing={3} marginBottom={3}>
-          {/* Izquierda */}
-          <Grid item size={9}>
-            <Grid container>
-            <Grid item xl={12}>
-            <Typography variant="subtitle1"  marginBottom={2}>
-              Detalles del afiliado:
-            </Typography>
-            </Grid>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          <Section title="Datos personales">
+            <Field label="CUIL" value={data.CUIL} />
+            <Field label="Sexo" value={data.Sexo} />
+            <Field label="Tipo y N° Doc." value={`${data.Tipo_Doc ?? ""} ${data.Nro_Doc ?? ""}`.trim()} />
+            <Field label="Fecha de nacimiento" value={data.Fecha_Nac} />
+            <Field label="Parentesco" value={data.Parentesco} />
+          </Section>
 
-            <Grid item md={6} bgcolor={'#e4e4e4ff'} borderRadius={2} padding={2}>
-              <Grid container spacing={3} marginBottom={3}>
-                <Grid item size={2}>
-                  <ReadOnlyOutlinedField
-                    id="nro-afiliado"
-                    label="N° Afiliado"
-                    value={data.Nro_Afil} />
-                </Grid>
-                <Grid item size={1}>
-                    <ReadOnlyOutlinedField
-                      id="parentesco"
-                      label="Parentesco"
-                      value={data.Parentesco} />
-                </Grid>
-                <Grid item size={1}>
-                    <ReadOnlyOutlinedField
-                      id="plan"
-                      label="Plan"
-                      value={data.Plan} />
-                </Grid>
-                <Grid item size={2}>
-                    <ReadOnlyOutlinedField
-                      id="tipo-cobertura"
-                      label="Tipo de Cobertura"
-                      value={data.Tipo_cobertura} />
-                </Grid>
-                <Grid item size={6}>
-                    <ReadOnlyOutlinedField
-                      id="vigencia"
-                      label="Vigencia"
-                      value={`Desde: ${data.fecha_inicio_cober} - Hasta: ${ data.fecha_fin_cober === null ? '—' : data.fecha_fin_cober}`} />
-                </Grid>
-              </Grid>
-              <Grid container spacing={3} marginBottom={3} >
-                  <Grid item size={5}>
-                    <ReadOnlyOutlinedField
-                      id="apellido-nombre"
-                      label="Apellido y Nombre"
-                      value={`${data.Apellido}, ${data.Nombre}`} />
-                  </Grid>
-                  <Grid item size={2}>
-                    <ReadOnlyOutlinedField
-                      id="cuil"
-                      label="CUIL"
-                      value={data.CUIL} />
-                  </Grid>
-                  <Grid item size={3}>
-                    <ReadOnlyOutlinedField
-                      id="tipo-y-nro-documento"
-                      label="Tipo y N° de Documento"
-                      value={`${data.Tipo_Doc} ${data.Nro_Doc}`} />
-                  </Grid>
-                  <Grid item size={2}>
-                    <ReadOnlyOutlinedField
-                      id="fecha-nacimiento"
-                      label="Fecha de Nacimiento"
-                      value={data.Fecha_Nac} />
-                  </Grid>
-              </Grid>
-              <Grid container spacing={3} marginBottom={3}>
-                  <Grid item size={3}>
-                    <ReadOnlyOutlinedField
-                      id="telefono"
-                      label="Telefono"
-                      value={data.telefonos} />
-                  </Grid>
-                  <Grid item size={3}>
-                    <ReadOnlyOutlinedField
-                      id="celular"
-                      label="Celular"
-                      value={data.celular ? data.celular : '—'} />
-                  </Grid>
-                  <Grid item size={6}>
-                    <ReadOnlyOutlinedField
-                      id="email"
-                      label="Email"
-                      value={data.Email} />
-                  </Grid>
-              </Grid>
-              <Grid container spacing={3} marginBottom={3}>
-                  <Grid item size={6}>
-                    <ReadOnlyOutlinedField
-                      id="domicilio"
-                      label="Domicilio"
-                      value={data.Domicilio} />
-                  </Grid>
-                  <Grid item size={4}>
-                    <ReadOnlyOutlinedField
-                      id="localidad"
-                      label="Localidad"
-                      value={data.Localidad} />
-                  </Grid>
-                  <Grid item size={2}>
-                    <ReadOnlyOutlinedField
-                      id="cp"
-                      label="CP"
-                      value={data.CP} />
-                  </Grid>
-              </Grid>
-              <Grid container spacing={3} marginBottom={3}>
-                  <Grid item size={6}>
-                    <ReadOnlyOutlinedField
-                      id="sucursal"
-                      label="Sucursal"
-                      value={data.Sucursal} />
-                  </Grid>
-                  <Grid item size={6}>
-                    <ReadOnlyOutlinedField
-                      id="zona"
-                      label="Zona"
-                      value={data.Zona} />
-                  </Grid>
-                  <Grid item size={6}>
-                    <ReadOnlyOutlinedField
-                      id="empresa"
-                      label="Empresa"
-                      value={data.Empresa} />
-                  </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-            </Grid>
-          
-          <Grid item size={3}>
-            <Typography variant="subtitle1" marginBottom={2}>Historial de Cobertura:</Typography>
-          <Grid item xs={12} md={4}>
-              <Box
-                 sx={{
-                   maxHeight: '56vh', // altura máxima que quieras
-                   overflowY: 'auto',
-                   pr: 1, // padding derecho para que no se corte el scroll
-                 }}
-                 borderRadius={2}
-                 >
-            {Array.isArray(historial) && historial.length > 0 ? (
-              [...historial]
-              .reverse()
-              .map((item, index) => (
-                <Grid
-                  key={index}
-                  container
-                  spacing={2}
-                  padding={2}
-                  mb={3}
-                  borderRadius={2}
-                  bgcolor={estaVigente(item.fecha_fin_cober) ? "#bddab1ff" : "#e4e4e4ff"}
-                >
-                      {historialFields
-                        .filter(({ hideIf }) => !(hideIf && hideIf(item)))
-                        .map(({ key, label, size }) => (
-                          <Grid item key={key} size={size}>
-                            <ReadOnlyOutlinedField
-                              label={label}
-                              value={
-                                item[key] ??
-                                (key === "fecha_fin_cober" ? "Vigente" : "— —")
-                              }
-                            />
-                          </Grid>
-                        ))}
-                  </Grid>
-              ))
-            ) : (
-              <Typography>No hay historial</Typography>
-            )}
-              </Box>
-          </Grid>
-          </Grid>
-          </Grid>
-          </DialogContent>
+          <Section title="Cobertura">
+            <Field label="Plan" value={data.Plan} />
+            <Field label="Tipo de cobertura" value={data.Tipo_cobertura} />
+            <Field label="Inicio" value={data.fecha_inicio_cober} />
+            <Field label="Fin" value={data.fecha_fin_cober ?? "actualidad"} />
+            <Field label="Sucursal" value={data.Sucursal} />
+            <Field label="Zona" value={data.Zona} />
+            <Field label="Empresa" value={data.Empresa} />
+          </Section>
+
+          <Section title="Contacto">
+            <Field label="Teléfono" value={data.telefonos} />
+            <Field label="Celular" value={data.celular} />
+            <Field label="Email" value={data.Email} />
+            <Field label="Domicilio" value={data.Domicilio} />
+            <Field label="Localidad" value={data.Localidad} />
+            <Field label="CP" value={data.CP} />
+          </Section>
+        </Box>
+
+        <Typography variant="subtitle2" sx={{ mb: 1, color: "primary.dark", fontWeight: 700 }}>
+          Historial de cobertura
+        </Typography>
+        <HistorialTabla historial={historial} />
+      </DialogContent>
     </Dialog>
-  )
-}
+  );
+};

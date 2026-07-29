@@ -1,37 +1,46 @@
 import { AfiliadoView } from "./AfiliadoView";
 import { AportesList } from "./AportesList";
 
-export default function PadronModal({ open, handleClose, data, historial, aportes, loading }) {
-  
-  // if (!data) return null;
+// ✅ Antes: un solo "type" ('afiliado' | 'aportes') decidía cuál de los
+// dos modales se mostraba, así que abrir Aportes desde adentro del
+// detalle cerraba el modal de detalle. Ahora son dos flags independientes:
+// pueden estar abiertos los dos a la vez (Aportes se apila arriba).
+export default function PadronModal({
+  afiliadoOpen,
+  data,
+  detalleLoading,
+  historial,
+  handleCloseAfiliado,
+  onImprimir,
+  onVerAportes,
 
-  const excludedKeys = [
-  "id",
-  "Nro_Afil",
-  "Nombre",
-  "Apellido",
-  "ben_id",
-  "Tipo_cobertura_cod",
-  "historial_coberturas",
-  "Zona_id",
-  "Empresa_id",
-  "Provincia_cod",
-  "Sucursal_id",
-  "fecha_inicio_cober_year_month",
-  "Localidad_cod",
-  "Parentesco_cod",
-  "Rep_id",
-];
+  aportesOpen,
+  aportes,
+  aportesLoading,
+  handleCloseAportes,
+}) {
+  return (
+    <>
+      {afiliadoOpen && (
+        <AfiliadoView
+          data={data}
+          loading={detalleLoading}
+          historial={historial}
+          handleClose={handleCloseAfiliado}
+          open={afiliadoOpen}
+          onImprimir={onImprimir}
+          onVerAportes={onVerAportes}
+        />
+      )}
 
-  const shouldRenderField = (key) => !excludedKeys.includes(key);
-
-  if(open === 'afiliado' && data) { 
-    return <AfiliadoView shouldRenderField={shouldRenderField} data={data} historial={historial} handleClose={handleClose} open={true} />
-  }
-
-  if (open === 'aportes') { 
-    return <AportesList open={true} rows={aportes} handleClose={handleClose} loading={loading} />
-  }
-
-  return null
+      {aportesOpen && (
+        <AportesList
+          open={aportesOpen}
+          rows={aportes}
+          handleClose={handleCloseAportes}
+          loading={aportesLoading}
+        />
+      )}
+    </>
+  );
 }

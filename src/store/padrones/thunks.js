@@ -1,18 +1,23 @@
 import intranetApi from "../../api/intranetApi";
-import {delay} from "../../utils/utils";
+import { delay } from "../../utils/utils";
 import { startLoading,
          setAfiliadoArr,
-         setAportes,
          reset,
          endLoading,
-         setError } from "./padronSlice";
-         
+         setError,
+         startDetalleLoading,
+         setAfiliadoDetalle,
+         setDetalleError,
+         startAportesLoading,
+         setAportes,
+         setAportesError } from "./padronSlice";
+
 export const fetchAfiliadoArr = (datos) => {
-    const { param, value, plan } = datos;      
-    
+    const { param, value, plan } = datos;
+
     return async (dispatch) => {
         dispatch(startLoading());
-        delay(1000)   
+        await delay(1000)
     try {
         if (plan) {
             const response = await intranetApi.get('intranet/',{params: {['plan']: plan}});
@@ -22,17 +27,24 @@ export const fetchAfiliadoArr = (datos) => {
         const response = await intranetApi.get('intranet/',{params: {[param]: value}});
         dispatch(setAfiliadoArr(response.data));
     } catch (error) {
-        console.log(error.response.data.message);
+        // ✅ Antes: error.response.data.message explotaba si error.response
+        // era undefined (error de red/timeout, sin respuesta del server),
+        // dejando el thunk colgado en loading:true para siempre.
+        console.log(error?.response?.data?.message ?? error.message);
         dispatch(setError(error.message));
     }
  };
 }
 
-export const printConsultaPadron = (datos) => {
+// ✅ Antes: recibía siempre afiliadoArr completo y hacía datos[0] adentro,
+// así que sin importar en qué fila se hacía click en "Imprimir", siempre
+// imprimía el primer resultado de la búsqueda. Ahora recibe directamente
+// el afiliado puntual sobre el que se quiere imprimir.
+export const printConsultaPadron = (afiliado) => {
     return async (dispatch) => {
         dispatch(startLoading());
         try {
-            const response = await intranetApi.post('/intranet/', datos[0],{
+            const response = await intranetApi.post('/intranet/', afiliado, {
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -41,7 +53,7 @@ export const printConsultaPadron = (datos) => {
 
             const blob = new Blob([response.data], { type: "application/pdf" });
             const url = window.URL.createObjectURL(blob);
-                
+
             const link = document.createElement("a");
                 link.href = url;
                 link.download = `Certificado.pdf`;
@@ -53,7 +65,7 @@ export const printConsultaPadron = (datos) => {
         } catch (error) {
             console.log(error.code, error.message);
             dispatch(setError(error.message));
-        } finally 
+        } finally
         { dispatch(endLoading());}
     };}
 
@@ -62,9 +74,23 @@ export const resetPadrones = () => {
         dispatch(reset());
     }};
 
+export const fetchAfiliadoDetalle = (cuil) => {
+    return async (dispatch) => {
+        dispatch(startDetalleLoading());
+        try {
+            const { data } = await intranetApi.get('intranet/', { params: { cuil } });
+            // El endpoint devuelve array (igual que la búsqueda múltiple);
+            // acá siempre nos quedamos con el primer/único resultado.
+            const detalle = Array.isArray(data) ? data[0] ?? null : data;
+            dispatch(setAfiliadoDetalle(detalle));
+        } catch (error) {
+            dispatch(setDetalleError(error?.response?.data?.message ?? error.message));
+        }
+    };
+}
 export const fetchAportes = (datos) => {
     return async (dispatch) => {
-        dispatch(startLoading());
+        dispatch(startAportesLoading());
         try {
             const {data} = await intranetApi.get('/aportes/',{params: {['cuil']: datos}});
 
@@ -72,7 +98,6 @@ export const fetchAportes = (datos) => {
   .map((aporte) => {
     const date = new Date(aporte.Periodo);
 
-    // Validar si la fecha es correcta
     if (isNaN(date)) return null;
 
     const mes = String(date.getMonth() + 1).padStart(2, "0");
@@ -80,19 +105,21 @@ export const fetchAportes = (datos) => {
 
     return {
       ...aporte,
-      Periodo: `${mes}/${anio}`, // sobrescribís el valor con el formato que quieras
-      _date: date,               // opcional, lo guardás para poder ordenar
+      Periodo: `${mes}/${anio}`,
+      _date: date,
     };
   })
-  .filter(Boolean) // saca los null si alguna fecha vino mal
-  .sort((a, b) => b._date - a._date) // ordena más reciente → más antiguo
-  .slice(0, 5) // tomás los primeros 5
-  .map(({ _date, ...rest }) => rest); // quitás la propiedad auxiliar
+  .filter(Boolean)
+  .sort((a, b) => b._date - a._date)
+  .slice(0, 5)
+  .map(({ _date, ...rest }) => rest);
 
             dispatch(setAportes(mapAportes));
-        } 
+        }
         catch (error) {
-            dispatch(setError(error.message));
+            // ✅ Antes: usaba el setError compartido con afiliadoArr, que
+            // vaciaba toda la tabla de resultados si fallaba esta consulta.
+            dispatch(setAportesError(error?.response?.data?.message ?? error.message));
         }
     }
 }

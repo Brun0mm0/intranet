@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const bearerToken = 'ba53538c88b2bf97e9d94fe598d56326';
+const bearerToken = '548ae5e14dee43adf3952231d1aaca43';
 
 const chatBotApi = axios.create({
     baseURL: 'http://130.130.205.80:8000/api',

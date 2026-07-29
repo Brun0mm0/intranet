@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './useAuth';
+import { useAuth } from './hooks/useAuth';
 import {SignInPage} from '@toolpad/core/SignInPage'
 import {AppProvider} from '@toolpad/core/AppProvider'
 import { Box, Button, CircularProgress, Typography, Link, Stack } from '@mui/material';

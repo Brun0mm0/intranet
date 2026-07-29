@@ -4,5 +4,4 @@
  */
 
 export * from './LoginPage'
-export * from './ProtectedRoute'
-export * from './useAuth'
+export * from './hooks/useAuth'

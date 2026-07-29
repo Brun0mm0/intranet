@@ -1,5 +1,5 @@
 import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from './auth'
+import {AuthProvider} from "./auth/hooks/AuthProvider";
 import AppRouter from "./routes/AppRouter";
 import NotificationProvider from "./components/NotificationProvider"
 import { LocalizationProvider } from "@mui/x-date-pickers";
