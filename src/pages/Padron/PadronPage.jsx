@@ -29,20 +29,41 @@ export default function PadronPage() {
     afiliadoDetalle,
     detalleLoading,
     aportesLoading,
+    ultimoParametroBusqueda,
   } = useSelector((state) => state.padrones);
 
   // ✅ Se marca cada fila según el tipo de búsqueda que la originó:
   // uno a muchos (array real de la API) trae Cuil_titular ya sin el
   // código de parentesco; uno a uno (objeto único envuelto acá en un
   // array de 1) lo trae con los 2 dígitos de parentesco al final.
-  const rows = useMemo(() =>
-    Array.isArray(afiliadoArr)
-      ? afiliadoArr.map((item, index) => ({ id: index, ...item, _esBusquedaUnica: false }))
-      : afiliadoArr
-        ? [{ id: 0, ...afiliadoArr, _esBusquedaUnica: true }]
-        : [],
-    [afiliadoArr]
-  );
+  //
+  // ✅ Caso puntual: la búsqueda por nro_cobertura (grupo familiar) viene
+  // con Cuil_titular en null para TODOS los integrantes — es un problema
+  // de datos del backend específico de esa búsqueda (el resto, dni,
+  // apellido, etc., lo trae bien). Como fallback, cuando la última
+  // búsqueda fue por nro_cobertura, se busca dentro del mismo array al
+  // integrante marcado como "Titular" y se usa su propio CUIL para
+  // completar Cuil_titular en las filas que lo tengan null.
+  const rows = useMemo(() => {
+    if (!Array.isArray(afiliadoArr)) {
+      return afiliadoArr ? [{ id: 0, ...afiliadoArr, _esBusquedaUnica: true }] : [];
+    }
+
+    const esGrupoFamiliar = ultimoParametroBusqueda === 'nro_cobertura';
+    // ✅ Antes buscaba por Parentesco === 'Titular', pero ese campo viene
+    // null en esta búsqueda puntual. El código de parentesco (Parentesco_cod)
+    // sí viene siempre — "S" es el código de Titular.
+    const titular = esGrupoFamiliar
+      ? afiliadoArr.find((item) => item.Parentesco_cod === 'S')
+      : null;
+
+    return afiliadoArr.map((item, index) => ({
+      id: index,
+      ...item,
+      Cuil_titular: item.Cuil_titular ?? (esGrupoFamiliar ? titular?.CUIL ?? null : item.Cuil_titular),
+      _esBusquedaUnica: false,
+    }));
+  }, [afiliadoArr, ultimoParametroBusqueda]);
 
   // ✅ Se abre el modal ya (con loading adentro) y se dispara la consulta
   // uno a uno por CUIL para traer el detalle completo del afiliado.

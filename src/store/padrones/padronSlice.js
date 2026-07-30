@@ -7,6 +7,13 @@ export const padronSlice = createSlice({
         loading: false,
         error: null,
 
+        // ✅ Guarda qué parámetro se usó en la última búsqueda a
+        // fetchAfiliadoArr ('dni' | 'cuil' | 'nro_cobertura' | etc.).
+        // Necesario porque solo la búsqueda por nro_cobertura (grupo
+        // familiar) tiene el problema de Cuil_titular null — el resto
+        // de las búsquedas (apellido, dni, etc.) lo devuelven bien.
+        ultimoParametroBusqueda: null,
+
         // ✅ Estado separado para el detalle de un afiliado (fetch uno a uno
         // por CUIL al hacer click en una fila). No comparte loading/error
         // con afiliadoArr para que un fallo acá no pise la lista principal.
@@ -14,7 +21,7 @@ export const padronSlice = createSlice({
         detalleLoading: false,
         detalleError: null,
 
-         // ✅ Estado separado para aportes. Antes usaba el mismo startLoading/
+        // ✅ Estado separado para aportes. Antes usaba el mismo startLoading/
         // setError que afiliadoArr: un fallo al buscar aportes de un
         // afiliado puntual vaciaba toda la tabla de resultados. Ahora es
         // independiente.
@@ -22,7 +29,7 @@ export const padronSlice = createSlice({
         aportesLoading: false,
         aportesError: null,
     },
-   reducers: {
+    reducers: {
         startLoading: (state) => {
             state.loading = true;
             state.error = null;
@@ -34,6 +41,9 @@ export const padronSlice = createSlice({
             state.afiliadoArr = action.payload;
             state.loading = false;
         },
+        setUltimoParametroBusqueda: (state, action) => {
+            state.ultimoParametroBusqueda = action.payload;
+        },
         setError: (state, action) => {
             state.afiliadoArr = [];
             state.error = action.payload;
@@ -44,7 +54,7 @@ export const padronSlice = createSlice({
             state.loading = false;
             state.error = null;
         },
- 
+
         // 🔹 Reducers del detalle (independientes de los de arriba)
         startDetalleLoading: (state) => {
             state.detalleLoading = true;
@@ -64,7 +74,7 @@ export const padronSlice = createSlice({
             state.detalleLoading = false;
             state.detalleError = null;
         },
- 
+
         // 🔹 Reducers de aportes (independientes de afiliadoArr/loading/error)
         startAportesLoading: (state) => {
             state.aportesLoading = true;
@@ -86,10 +96,11 @@ export const padronSlice = createSlice({
         },
     }
 })
- 
+
 export const { endLoading,
                startLoading,
                setAfiliadoArr,
+               setUltimoParametroBusqueda,
                setError,
                reset,
                startDetalleLoading,
@@ -100,4 +111,3 @@ export const { endLoading,
                setAportes,
                setAportesError,
                resetAportes } = padronSlice.actions;
- 

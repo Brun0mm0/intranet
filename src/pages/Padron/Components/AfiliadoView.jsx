@@ -150,11 +150,11 @@ export const AfiliadoView = ({
       <DialogTitle sx={{ pb: 1 }}>
         <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <Box>
-            <Typography variant="h6" fontWeight={700}>
+            <Typography variant="subtitle1" fontWeight={600}>
               {data.Apellido}, {data.Nombre}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="subtitle2" color="text.primary" fontWeight={600}>
                 N° Afiliado {data.Nro_Afil}
               </Typography>
               <Chip

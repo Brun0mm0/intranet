@@ -2,6 +2,7 @@ import intranetApi from "../../api/intranetApi";
 import { delay } from "../../utils/utils";
 import { startLoading,
          setAfiliadoArr,
+         setUltimoParametroBusqueda,
          reset,
          endLoading,
          setError,
@@ -22,10 +23,12 @@ export const fetchAfiliadoArr = (datos) => {
         if (plan) {
             const response = await intranetApi.get('intranet/',{params: {['plan']: plan}});
             dispatch(setAfiliadoArr(response.data));
+            dispatch(setUltimoParametroBusqueda('plan'));
             return;
         }
         const response = await intranetApi.get('intranet/',{params: {[param]: value}});
         dispatch(setAfiliadoArr(response.data));
+        dispatch(setUltimoParametroBusqueda(param));
     } catch (error) {
         // ✅ Antes: error.response.data.message explotaba si error.response
         // era undefined (error de red/timeout, sin respuesta del server),

@@ -52,10 +52,9 @@ function RowActionsMenu({ row, onInfoClick, fetchAportes, onPrintConsulta, onVer
 
   const handleAportes = () => {
     handleCloseMenu();
-    // ✅ Se saca siempre el código de parentesco (últimos 2 dígitos) de
-    // Cuil_titular antes de buscar aportes.
-    const cuil = String(row.Cuil_titular);
-    fetchAportes(row.Cuil_titular ? row.Cuil_titular : row.CUIL);
+    // ✅ El CUIL no lleva ningún código pegado al final (a diferencia de
+    // Nro_Afil) — se usa tal cual viene del backend, sin recortar.
+    fetchAportes(row.Cuil_titular);
   };
 
   const handleImprimir = () => {
@@ -97,7 +96,7 @@ function RowActionsMenu({ row, onInfoClick, fetchAportes, onPrintConsulta, onVer
           <ListItemIcon><HistoryIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Ver historial</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleAportes}>
+        <MenuItem onClick={handleAportes} disabled={!row.Cuil_titular}>
           <ListItemIcon><PriceCheckOutlinedIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Aportes</ListItemText>
         </MenuItem>
