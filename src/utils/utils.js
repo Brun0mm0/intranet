@@ -35,10 +35,25 @@ export const afiliadoParse = (data) => {
 
 export const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+// ✅ Antes: solo parseaba formato ISO "YYYY-MM-DD" (split por '-').
+// El historial_coberturas de la API viene en formato "DD/MM/YYYY" (con
+// barras), así que con fechas de historial esto devolvía una fecha
+// inválida (NaN) en vez de romper explícitamente. Ahora detecta el
+// separador y parsea según corresponda, sin tener que tocar quién llama
+// a esta función ni a estaVigente.
 export const parseFechaLocal = (fechaStr) => {
-        const [year, month, day] = fechaStr.split('-').map(Number);
-        return new Date(year, month - 1, day)
-    } 
+        if (!fechaStr) return null;
+
+        if (fechaStr.includes('-')) {
+            // Formato ISO: YYYY-MM-DD
+            const [year, month, day] = fechaStr.split('-').map(Number);
+            return new Date(year, month - 1, day);
+        }
+
+        // Formato argentino: DD/MM/YYYY
+        const [day, month, year] = fechaStr.split('/').map(Number);
+        return new Date(year, month - 1, day);
+    }
 
 export const estaVigente = (fechaInicioCoberStr, fechaFinCoberStr) => {
 

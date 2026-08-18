@@ -12,13 +12,20 @@ import { startLoading,
          startAportesLoading,
          setAportes,
          setAportesError } from "./padronSlice";
+import {showNotification} from '../notification/notificationSlice';
 
 export const fetchAfiliadoArr = (datos) => {
-    const { param, value, plan } = datos;
+    const { param, value, plan, sinDelay } = datos;
 
     return async (dispatch) => {
         dispatch(startLoading());
-        await delay(1000)
+        // ✅ El delay artificial de 1s se salta cuando sinDelay=true —
+        // usado por la auto-búsqueda de Apellido/Nombre, que necesita
+        // responder rápido mientras el usuario tipea. El resto de las
+        // búsquedas manuales (dni, cuil, etc.) lo siguen teniendo igual.
+        if (!sinDelay) {
+            await delay(1000);
+        }
     try {
         if (plan) {
             const response = await intranetApi.get('intranet/',{params: {['plan']: plan}});
@@ -33,8 +40,8 @@ export const fetchAfiliadoArr = (datos) => {
         // ✅ Antes: error.response.data.message explotaba si error.response
         // era undefined (error de red/timeout, sin respuesta del server),
         // dejando el thunk colgado en loading:true para siempre.
-        console.log(error?.response?.data?.message ?? error.message);
         dispatch(setError(error.message));
+        dispatch(showNotification({ message: `No se pudo completar la búsqueda: ${error.message}`, type: 'error' }));
     }
  };
 }
@@ -66,7 +73,7 @@ export const printConsultaPadron = (afiliado) => {
                 window.URL.revokeObjectURL(url);
 
         } catch (error) {
-            console.log(error.code, error.message);
+            dispatch(showNotification({ message: `No se pudo generar el pdf`, type: 'error' }));
             dispatch(setError(error.message));
         } finally
         { dispatch(endLoading());}
@@ -87,6 +94,7 @@ export const fetchAfiliadoDetalle = (cuil) => {
             const detalle = Array.isArray(data) ? data[0] ?? null : data;
             dispatch(setAfiliadoDetalle(detalle));
         } catch (error) {
+            dispatch(showNotification({ message: `No se pudo cargar el detalle del afiliado: ${error.message}`, type: 'error' }));
             dispatch(setDetalleError(error?.response?.data?.message ?? error.message));
         }
     };
@@ -122,6 +130,7 @@ export const fetchAportes = (datos) => {
         catch (error) {
             // ✅ Antes: usaba el setError compartido con afiliadoArr, que
             // vaciaba toda la tabla de resultados si fallaba esta consulta.
+            dispatch(showNotification({ message: `No se pudieron cargar los aportes: ${error.message}`, type: 'error' }));
             dispatch(setAportesError(error?.response?.data?.message ?? error.message));
         }
     }

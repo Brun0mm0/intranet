@@ -4,12 +4,11 @@ import PadronesList from "./Components/PadronesList";
 import PadronModal from "./Components/PadronModal";
 import { PadronSucursal } from "./Components/PadronSucursal";
 import { ChatBotContainer } from "../../components/chatBot";
-
+import { RowActionsMenu } from "./Columns/Rowactionsmenu";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useCallback, useMemo } from "react";
 import { fetchAportes, printConsultaPadron, fetchAfiliadoDetalle, fetchAfiliadoArr } from "../../store/padrones/thunks";
-import { resetAfiliadoDetalle, resetAportes } from "../../store/padrones/padronSlice";
-// import äportesMock from "../../api/modelo.json";
+import { resetAfiliadoDetalle, resetAportes, resetFiltroSecundario } from "../../store/padrones/padronSlice";
 
 export default function PadronPage() {
 
@@ -30,6 +29,8 @@ export default function PadronPage() {
     detalleLoading,
     aportesLoading,
     ultimoParametroBusqueda,
+    filtroSecundario,
+    filtroSecundarioCampo,
   } = useSelector((state) => state.padrones);
 
   // ✅ Se marca cada fila según el tipo de búsqueda que la originó:
@@ -44,26 +45,48 @@ export default function PadronPage() {
   // búsqueda fue por nro_cobertura, se busca dentro del mismo array al
   // integrante marcado como "Titular" y se usa su propio CUIL para
   // completar Cuil_titular en las filas que lo tengan null.
+  //
+  // ✅ Filtro secundario: búsqueda combinada "apellido,nombre" (ej:
+  // "pr,br"). No pega al backend de nuevo — filtra sobre lo que ya
+  // trajo afiliadoArr, por el campo complementario.
   const rows = useMemo(() => {
+    let built;
+
     if (!Array.isArray(afiliadoArr)) {
-      return afiliadoArr ? [{ id: 0, ...afiliadoArr, _esBusquedaUnica: true }] : [];
+      built = afiliadoArr ? [{ id: 0, ...afiliadoArr, _esBusquedaUnica: true }] : [];
+    } else {
+      const esGrupoFamiliar = ultimoParametroBusqueda === 'nro_cobertura';
+      // ✅ Antes buscaba por Parentesco === 'Titular', pero ese campo viene
+      // null en esta búsqueda puntual. El código de parentesco (Parentesco_cod)
+      // sí viene siempre — "S" es el código de Titular.
+      const titular = esGrupoFamiliar
+        ? afiliadoArr.find((item) => item.Parentesco_cod === 'S')
+        : null;
+
+      built = afiliadoArr.map((item, index) => ({
+        id: index,
+        ...item,
+        Cuil_titular: item.Cuil_titular ?? (esGrupoFamiliar ? titular?.CUIL ?? null : item.Cuil_titular),
+        _esBusquedaUnica: false,
+      }));
     }
 
-    const esGrupoFamiliar = ultimoParametroBusqueda === 'nro_cobertura';
-    // ✅ Antes buscaba por Parentesco === 'Titular', pero ese campo viene
-    // null en esta búsqueda puntual. El código de parentesco (Parentesco_cod)
-    // sí viene siempre — "S" es el código de Titular.
-    const titular = esGrupoFamiliar
-      ? afiliadoArr.find((item) => item.Parentesco_cod === 'S')
-      : null;
+    if (!filtroSecundario || !filtroSecundarioCampo) {
+      return built;
+    }
 
-    return afiliadoArr.map((item, index) => ({
-      id: index,
-      ...item,
-      Cuil_titular: item.Cuil_titular ?? (esGrupoFamiliar ? titular?.CUIL ?? null : item.Cuil_titular),
-      _esBusquedaUnica: false,
-    }));
-  }, [afiliadoArr, ultimoParametroBusqueda]);
+    // ✅ Antes: startsWith sobre el string completo — un afiliado con
+    // "JUAN CARLOS" como Nombre nunca matcheaba si escribías "carlos"
+    // (no estaba al principio del string). Ahora se parte el campo en
+    // palabras y alcanza con que UNA de ellas empiece con el término.
+    const termino = filtroSecundario.toLowerCase();
+    return built.filter((row) => {
+      const valorCampo = (row[filtroSecundarioCampo] ?? "").toString().toLowerCase();
+      return valorCampo
+        .split(/\s+/)
+        .some((palabra) => palabra.startsWith(termino));
+    });
+  }, [afiliadoArr, ultimoParametroBusqueda, filtroSecundario, filtroSecundarioCampo]);
 
   // ✅ Se abre el modal ya (con loading adentro) y se dispara la consulta
   // uno a uno por CUIL para traer el detalle completo del afiliado.
@@ -101,6 +124,7 @@ export default function PadronPage() {
   const handleVerGrupoFamiliar = (nroAfil) => {
     setAfiliadoOpen(false);
     dispatch(resetAfiliadoDetalle());
+    dispatch(resetFiltroSecundario());
     dispatch(fetchAfiliadoArr({
       param: 'nro_cobertura',
       value: `${nroAfil}`,
@@ -141,9 +165,9 @@ export default function PadronPage() {
             />
           </Box>
 
-          <Box sx={{ flexShrink: 0 }}>
+          {/* <Box sx={{ flexShrink: 0 }}>
             <ChatBotContainer />
-          </Box>
+          </Box> */}
         </Stack>
 
         <PadronModal

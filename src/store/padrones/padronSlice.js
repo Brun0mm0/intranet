@@ -14,6 +14,13 @@ export const padronSlice = createSlice({
         // de las búsquedas (apellido, dni, etc.) lo devuelven bien.
         ultimoParametroBusqueda: null,
 
+        // ✅ Filtro secundario, cliente-side, para la búsqueda combinada
+        // "apellido,nombre" (ej: "pr,br" → apellido empieza con "pr" Y
+        // nombre empieza con "br"). No dispara ningún request nuevo, solo
+        // filtra sobre lo que ya trajo afiliadoArr.
+        filtroSecundario: null,
+        filtroSecundarioCampo: null,
+
         // ✅ Estado separado para el detalle de un afiliado (fetch uno a uno
         // por CUIL al hacer click en una fila). No comparte loading/error
         // con afiliadoArr para que un fallo acá no pise la lista principal.
@@ -44,8 +51,16 @@ export const padronSlice = createSlice({
         setUltimoParametroBusqueda: (state, action) => {
             state.ultimoParametroBusqueda = action.payload;
         },
+        setFiltroSecundario: (state, action) => {
+            state.filtroSecundario = action.payload.valor;
+            state.filtroSecundarioCampo = action.payload.campo;
+        },
+        resetFiltroSecundario: (state) => {
+            state.filtroSecundario = null;
+            state.filtroSecundarioCampo = null;
+        },
         setError: (state, action) => {
-            state.afiliadoArr = [];
+            // state.afiliadoArr = [];
             state.error = action.payload;
             state.loading = false;
         },
@@ -53,6 +68,8 @@ export const padronSlice = createSlice({
             state.afiliadoArr = [];
             state.loading = false;
             state.error = null;
+            state.filtroSecundario = null;
+            state.filtroSecundarioCampo = null;
         },
 
         // 🔹 Reducers del detalle (independientes de los de arriba)
@@ -101,6 +118,8 @@ export const { endLoading,
                startLoading,
                setAfiliadoArr,
                setUltimoParametroBusqueda,
+               setFiltroSecundario,
+               resetFiltroSecundario,
                setError,
                reset,
                startDetalleLoading,

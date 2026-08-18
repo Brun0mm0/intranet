@@ -8,13 +8,17 @@ import {
   Radio,
   RadioGroup,
   Stack,
-  Tooltip,
 } from "@mui/material";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "motion/react";
 import useForm from "../../../hooks/useForm";
 import { fetchAfiliadoArr } from "../../../store/padrones/thunks";
 import { useDispatch } from "react-redux";
 import { SearchInput } from "../../../components/inputs/SearchInput";
+import { useBusquedaAutomatica } from "../hooks/useBusquedaAutomatica";
+import { validarInputPadron } from "../../../utils/Validarinputpadron";
+
+const PARAMS_CON_BUSQUEDA_AUTOMATICA = ["apellido", "nombre"];
 
 export default function PadronesBar({ loading }) {
   const dispatch = useDispatch();
@@ -25,43 +29,14 @@ export default function PadronesBar({ loading }) {
     value: "",
   });
 
-  function validarInput(valor, tipo, plan) {
-    const cleanValue = valor.replace(/\D/g, "");
+  const esBusquedaAutomatica = PARAMS_CON_BUSQUEDA_AUTOMATICA.includes(values.param);
 
-    if (!valor && !plan) return "Este campo es obligatorio";
-
-    if (tipo === "dni" && !plan) {
-      return /^\d{7,8}$/.test(cleanValue)
-        ? null
-        : "El DNI debe tener 7 u 8 dígitos";
-    }
-
-    if (tipo === "cuil") {
-      return /^\d{11}$/.test(cleanValue)
-        ? null
-        : "El CUIL debe tener 11 dígitos";
-    }
-
-    if (tipo === "Nro_Afil") {
-      return /^\d{1,10}$/.test(cleanValue)
-        ? null
-        : "El número de afiliado debe ser un número de hasta 10 dígitos";
-    }
-
-    if (tipo === "nro_cobertura") {
-      return /^\d+$/.test(cleanValue)
-        ? null
-        : "El número de cobertura debe contener solo números";
-    }
-
-    if (tipo === "nombre" || tipo === "apellido") {
-      return /^[a-zA-Z\s]+$/.test(valor)
-        ? null
-        : "Solo puede contener letras y espacios";
-    }
-
-    return null;
-  }
+  // ✅ Apellido y Nombre ahora buscan solas (sin botón): al llegar a 2
+  // caracteres se dispara la búsqueda al backend con una pausa breve
+  // (debounce), y agregando una coma se puede filtrar el resultado por el
+  // campo complementario sin golpear la API de nuevo — ej: "pr,br".
+  // Toda esa lógica vive en el hook, acá solo se activa.
+  useBusquedaAutomatica({ activo: esBusquedaAutomatica, param: values.param, value: values.value });
 
   const handleRadioChange = (e) => {
     handleChange(e);
@@ -83,7 +58,11 @@ export default function PadronesBar({ loading }) {
   };
 
   const handleBuscar = () => {
-    const error = validarInput(values.value, values.param, values.plan);
+    // ✅ Apellido/Nombre ya se manejan solos con el hook de arriba —
+    // el submit manual queda reservado para el resto de las opciones.
+    if (esBusquedaAutomatica) return;
+
+    const error = validarInputPadron(values.value, values.param, values.plan);
 
     if (error) {
       setError("value", error);
@@ -139,15 +118,6 @@ export default function PadronesBar({ loading }) {
                   <FormControlLabel value="dni" control={<Radio size="small" />} label="DNI" />
                   <FormControlLabel value="cuil" control={<Radio size="small" />} label="CUIL" />
                   <FormControlLabel value="Nro_Afil" control={<Radio size="small" />} label="N de Afiliado" />
-                  <FormControlLabel
-                    value="nro_cobertura"
-                    control={<Radio size="small" />}
-                    label={
-                      <Tooltip title="Busqueda por numero de cobertura">
-                        <span>Grupo Familiar</span>
-                      </Tooltip>
-                    }
-                  />
                   <FormControlLabel value="apellido" control={<Radio size="small" />} label="Apellido" />
                   <FormControlLabel value="nombre" control={<Radio size="small" />} label="Nombre" />
                 </RadioGroup>
@@ -167,28 +137,40 @@ export default function PadronesBar({ loading }) {
                   name="value"
                   value={values.value}
                   onChange={handleInputChange}
+                  placeholder={
+                    esBusquedaAutomatica
+                      ? `Ej: pr,br (${values.param} + filtro)`
+                      : undefined
+                  }
                 />
-                <FormHelperText>{errors.value}</FormHelperText>
+                <FormHelperText>
+                  {errors.value ??
+                    (esBusquedaAutomatica
+                      ? "Escribí 2+ letras para buscar. Agregá una coma para filtrar por el otro campo."
+                      : null)}
+                </FormHelperText>
               </FormControl>
             </Stack>
           </Box>
         </motion.div>
 
-        <Stack direction={"row"} spacing={1}>
-          <Button
-            type="submit"
-            sx={{
-              borderColor: "rgba(0, 154, 218, 0.5)",
-              bgcolor: "rgba(65, 165, 207, 0.2)",
-              "&:hover": { bgcolor: "rgba(59, 172, 221, 0.5)" },
-            }}
-            size="large"
-            variant="outlined"
-            loading={loading}
-          >
-            Buscar
-          </Button>
-        </Stack>
+        {!esBusquedaAutomatica && (
+          <Stack direction={"row"} spacing={1}>
+            <Button
+              type="submit"
+              sx={{
+                borderColor: "rgba(0, 154, 218, 0.5)",
+                bgcolor: "rgba(65, 165, 207, 0.2)",
+                "&:hover": { bgcolor: "rgba(59, 172, 221, 0.5)" },
+              }}
+              size="large"
+              variant="outlined"
+              loading={loading}
+            >
+              Buscar
+            </Button>
+          </Stack>
+        )}
       </Box>
     </AnimatePresence>
   );

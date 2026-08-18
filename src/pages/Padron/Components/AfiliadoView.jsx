@@ -1,6 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import PrintOutlinedIcon from "@mui/icons-material/PrintOutlined";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
+import { estaVigente } from "../../../utils/utils";
 import {
   Dialog,
   DialogTitle,
@@ -86,7 +87,11 @@ function HistorialTabla({ historial }) {
       </TableHead>
       <TableBody>
         {ordenado.map((item, index) => {
-          const vigente = !item.fecha_fin_cober;
+          // ✅ Antes: `!item.fecha_fin_cober` solo miraba si el campo existía,
+          // sin comparar contra la fecha actual — una cobertura con fecha de
+          // fin ya vencida igual se marcaba como "Vigente". Ahora usa la
+          // misma función compartida que el resto de la app (utils.js).
+          const vigente = estaVigente(item.fecha_inicio_cober, item.fecha_fin_cober);
           return (
             <TableRow key={index}>
               <TableCell>{item.plan_cober}</TableCell>
@@ -118,16 +123,6 @@ export const AfiliadoView = ({
   onVerAportes,
 }) => {
 
-  const estaVigente = (fecha) => {
-    if (!fecha) return true;
-    const [day, month, year] = fecha.split('/').map(Number);
-    const f = new Date(year, month - 1, day);
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-    f.setHours(0, 0, 0, 0);
-    return f >= hoy;
-  };
-
   if (loading || !data) {
     return (
       <Dialog maxWidth="lg" fullWidth open={open} onClose={handleClose}>
@@ -143,18 +138,18 @@ export const AfiliadoView = ({
     );
   }
 
-  const vigente = estaVigente(data.fecha_fin_cober);
+  const vigente = estaVigente(data.fecha_inicio_cober, data.fecha_fin_cober);
 
   return (
     <Dialog maxWidth="lg" fullWidth open={open} onClose={handleClose}>
       <DialogTitle sx={{ pb: 1 }}>
         <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <Box>
-            <Typography variant="subtitle1" fontWeight={600}>
+            <Typography variant="h6" fontWeight={700}>
               {data.Apellido}, {data.Nombre}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-              <Typography variant="subtitle2" color="text.primary" fontWeight={600}>
+              <Typography variant="body2" color="text.secondary">
                 N° Afiliado {data.Nro_Afil}
               </Typography>
               <Chip
@@ -181,11 +176,9 @@ export const AfiliadoView = ({
               variant="outlined"
               startIcon={<PriceCheckOutlinedIcon />}
               onClick={() => {
-                // ✅ `data` acá siempre viene de fetchAfiliadoDetalle (consulta
-                // uno a uno por CUIL), así que Cuil_titular siempre trae el
-                // código de parentesco de 2 dígitos al final — se saca siempre.
-                const cuilBase = data.Cuil_titular ?? data.CUIL;
-                onVerAportes?.(cuilBase);
+                // ✅ El CUIL no lleva ningún código pegado al final — se usa
+                // tal cual viene del backend, sin recortar.
+                onVerAportes?.(data.Cuil_titular ?? data.CUIL);
               }}
             >
               Aportes

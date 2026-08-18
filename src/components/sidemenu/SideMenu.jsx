@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
 import MuiDrawer, { drawerClasses } from '@mui/material/Drawer';
@@ -10,38 +9,76 @@ import OptionsMenu from './OptionsMenu';
 import SelectContent from './SelectContent';
 import MenuContent from './MenuContent';
 import { SideMenuContext } from './SideMenuContext';
+import { useMemo, useState, useRef, useEffect } from 'react';
 
 const expandedWidth = 240;
 const collapsedWidth = 70;
 
+// ✅ Antes: easing.sharp (pensado para elementos que se van rápido de la
+// pantalla, ej. un snackbar) — se sentía "de golpe" en algo que el
+// usuario controla con hover. easeInOut da una curva simétrica, más
+// natural para algo que abre y cierra repetidamente.
 const Drawer = styled(MuiDrawer)(({ theme, ownerState }) => ({
   width: ownerState.open ? expandedWidth : collapsedWidth,
   flexShrink: 0,
   whiteSpace: 'nowrap',
   transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
+    easing: theme.transitions.easing.easeInOut,
     duration: theme.transitions.duration.standard,
   }),
   [`& .${drawerClasses.paper}`]: {
     width: ownerState.open ? expandedWidth : collapsedWidth,
     overflowX: 'hidden',
     transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
+      easing: theme.transitions.easing.easeInOut,
       duration: theme.transitions.duration.standard,
     }),
   },
 }));
 
 export default function SideMenu({ usuario = "Usuario" }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const closeTimeoutRef = useRef(null);
+  const openTimeoutRef = useRef(null);
+
+  // ✅ Ahora también la apertura tiene un pequeño retardo: si el mouse
+  // solo pasó de largo por encima del borde (sin quedarse), el timeout
+  // se cancela antes de llegar a abrir — evita el "se abre solo por
+  // accidente" al cruzar el mouse rápido.
+  const handleMouseEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    openTimeoutRef.current = setTimeout(() => {
+      setOpen(true);
+    }, 150);
+  };
+
+  const handleMouseLeave = () => {
+    if (openTimeoutRef.current) {
+      clearTimeout(openTimeoutRef.current);
+      openTimeoutRef.current = null;
+    }
+    closeTimeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 200);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+      if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
+    };
+  }, []);
 
   return (
     <SideMenuContext.Provider value={{open}}>
     <Drawer
       variant="permanent"
       ownerState={{ open }}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       sx={{
         display: { xs: 'none', md: 'block' },
         [`& .${drawerClasses.paper}`]: {

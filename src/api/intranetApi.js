@@ -23,7 +23,7 @@ intranetApi.interceptors.response.use(
     if (error.code === 'ECONNABORTED') {
       store.dispatch({
         type: 'notification/showNotification',
-        payload: 'La solicitud tardó demasiado (timeout)'
+        payload: {message: 'La solicitud tardó demasiado (timeout)', type: 'error'}
       });
       return Promise.reject(error);
     }
@@ -35,7 +35,7 @@ intranetApi.interceptors.response.use(
       store.dispatch(ResetAfiliacion());
       store.dispatch({
         type: 'notification/showNotification',
-        payload: 'La sesión expiró'
+        payload: {message: 'La sesión expiró', type: 'error'}
       });
       // ✅ No emitir si ya estamos en login
       if (window.location.pathname !== '/login') {

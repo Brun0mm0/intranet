@@ -1,13 +1,6 @@
-import GroupsIcon from "@mui/icons-material/Groups";
-import { useState } from "react";
-import { Box, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Popover, Tooltip } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import PrintOutlinedIcon from "@mui/icons-material/PrintOutlined";
-import PersonSearchIcon from "@mui/icons-material/PersonSearch";
-import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
-import HistoryIcon from "@mui/icons-material/History";
+import { Box, Tooltip } from "@mui/material";
 import { copyToClipboard, estaVigente } from "../../../utils/utils";
-import { PadronesHistorial } from "../Components/PadronesHistorial";
+import { RowActionsMenu } from "./RowActionsMenu";
 
 // 🔹 Copy reutilizable (sin cambios de comportamiento)
 const renderCopyCell = (transform) => (params) => {
@@ -28,102 +21,6 @@ const renderCopyCell = (transform) => (params) => {
     </Tooltip>
   );
 };
-
-// 🔹 Menú de acciones por fila — reemplaza los botones sueltos (Ver/Aportes/Activo)
-// que antes solo aparecían cuando `variant === "simple"` (un solo resultado).
-// Ahora es una única columna, siempre presente, sin importar cuántas filas haya.
-function RowActionsMenu({ row, onInfoClick, fetchAportes, onPrintConsulta, onVerGrupoFamiliar }) {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [historialAnchor, setHistorialAnchor] = useState(null);
-
-  const menuOpen = Boolean(anchorEl);
-  const historialOpen = Boolean(historialAnchor);
-
-  const handleOpenMenu = (e) => {
-    e.stopPropagation();
-    setAnchorEl(e.currentTarget);
-  };
-  const handleCloseMenu = () => setAnchorEl(null);
-
-  const handleVer = () => {
-    handleCloseMenu();
-    onInfoClick(row);
-  };
-
-  const handleAportes = () => {
-    handleCloseMenu();
-    // ✅ El CUIL no lleva ningún código pegado al final (a diferencia de
-    // Nro_Afil) — se usa tal cual viene del backend, sin recortar.
-    fetchAportes(row.Cuil_titular);
-  };
-
-  const handleImprimir = () => {
-    handleCloseMenu();
-    // ✅ Antes: onPrintConsulta() no recibía la fila y siempre imprimía
-    // afiliadoArr[0] sin importar en qué fila se hacía click.
-    onPrintConsulta(row);
-  };
-
-  const handleVerGrupoFamiliar = () => {
-    handleCloseMenu();
-    // ✅ Se saca siempre el código de parentesco (últimos 2 dígitos) de
-    // Nro_Afil ANTES de que PadronPage le vuelva a agregar "00" — si no,
-    // queda un "00" duplicado (9 dígitos → 11).
-    const nroAfil = String(row.Nro_Afil).slice(0, -2);
-    onVerGrupoFamiliar(nroAfil);
-  };
-
-  const handleVerHistorial = (e) => {
-    const anchor = anchorEl;
-    handleCloseMenu();
-    setHistorialAnchor(anchor);
-  };
-
-  const handleCloseHistorial = () => setHistorialAnchor(null);
-
-  return (
-    <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
-      <IconButton size="small" onClick={handleOpenMenu}>
-        <MoreVertIcon fontSize="small" />
-      </IconButton>
-
-      <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleCloseMenu}>
-        <MenuItem onClick={handleVer}>
-          <ListItemIcon><PersonSearchIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Ver</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleVerHistorial} disabled={!row.historial_coberturas?.length}>
-          <ListItemIcon><HistoryIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Ver historial</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleAportes} disabled={!row.Cuil_titular}>
-          <ListItemIcon><PriceCheckOutlinedIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Aportes</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleImprimir}>
-          <ListItemIcon><PrintOutlinedIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Imprimir</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleVerGrupoFamiliar}>
-          <ListItemIcon><GroupsIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Ver grupo familiar</ListItemText>
-        </MenuItem>
-      </Menu>
-
-      <Popover
-        open={historialOpen}
-        anchorEl={historialAnchor}
-        onClose={handleCloseHistorial}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "left" }}
-      >
-        <Box p={2}>
-          <PadronesHistorial historial={row.historial_coberturas || []} />
-        </Box>
-      </Popover>
-    </Box>
-  );
-}
 
 // 🔹 Columna de estado (antes mezclada con la acción "ver historial" y
 // condicionada por variant). Ahora es solo un indicador de vigencia,
@@ -179,12 +76,12 @@ export const getCopyColumns = () => [
 ];
 
 // 🔹 Columna de Acciones — un solo desplegable, siempre al final de la fila.
-// Antes: variant "simple"/"full" decidía si aparecían activo/ver/aportes,
-// lo que hacía que la lista se viera distinta según la cantidad de resultados.
+// El componente interactivo (RowActionsMenu) vive en su propio archivo;
+// acá solo se arma la definición de columna para el DataGrid.
 export const getActionsColumn = ({ onPrintConsulta, onInfoClick, fetchAportes, onVerGrupoFamiliar }) => ({
   field: "acciones",
   headerName: "Acciones",
-  width: 70,
+  width: 80,
   sortable: false,
   filterable: false,
   renderCell: (params) => (

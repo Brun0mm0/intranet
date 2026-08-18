@@ -56,9 +56,9 @@ export default function LoginPage() {
     if(provider.id === 'credentials') {
       try {
         const usuario = formData.get('email')?.toString().trim();
-        // const password = formData.get('password')?.toString().trim();
-        // await login({usuario:usuario,password:password});
-          await login({usuario:usuario,password:80047707});
+        const password = formData.get('password')?.toString().trim();
+        await login({usuario:usuario,password:password});
+          // await login({usuario:usuario,password:80047707});
         // bruno.provenzano brun0330
         navigate('/padrones');
         return
