@@ -9,29 +9,32 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon, { listItemIconClasses } from '@mui/material/ListItemIcon';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import MenuButton from './MenuButton';
 import { useAuth } from '../../auth';
 import { useNavigate } from 'react-router-dom';
-
 
 const MenuItem = styled(MuiMenuItem)({
   margin: '2px 0',
 });
 
 export default function OptionsMenu() {
-  const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const { logout } = useAuth();
-  const handleClick = async (event) => {
+  const navigate = useNavigate();
+
+  const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
-  }
+  };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   const handleLogout = async () => {
     setAnchorEl(null);
-    await logout(); // Call logout function from useAuth
+    await logout();
   };
 
   return (
@@ -63,18 +66,35 @@ export default function OptionsMenu() {
         }}
       >
         <MenuItem
-          onClick={handleLogout}
+          onClick={() => {
+            handleClose();
+            navigate('/cambio-contrasena');
+          }}
           sx={{
             [`& .${listItemIconClasses.root}`]: {
-              ml: 'auto',
+              ml: '2px',
               minWidth: 0,
             },
           }}
         >
-          <ListItemText>Logout</ListItemText>
+          <ListItemIcon>
+            <MiscellaneousServicesIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText sx={{ ml: '2px' }}>Cambio de contraseña</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={handleLogout}
+          sx={{
+            [`& .${listItemIconClasses.root}`]: {
+              ml: '2px',
+              minWidth: 0,
+            },
+          }}
+        >
           <ListItemIcon>
             <LogoutRoundedIcon fontSize="small" />
           </ListItemIcon>
+          <ListItemText>Salir</ListItemText>
         </MenuItem>
       </Menu>
     </React.Fragment>
