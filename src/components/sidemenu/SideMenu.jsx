@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography';
 import OptionsMenu from './OptionsMenu';
 import SelectContent from './SelectContent';
 import MenuContent from './MenuContent';
+import MensajeriaWidget from './MensajeriaWidget';
+import ContactosWidget from './ContactosWidget';
 import { SideMenuContext } from './SideMenuContext';
 import { useMemo, useState, useRef, useEffect } from 'react';
 
@@ -107,16 +109,20 @@ export default function SideMenu({ usuario = "Usuario" }) {
 
       {/* Footer con avatar y usuario */}
       <Stack
-        direction="row"
+        direction="column"
+        spacing={2}
         sx={{
           p: 2,
           gap: open ? 1 : 0,
-          alignItems: 'center',
+          alignItems: open ? 'flex-start' : 'center',
           borderTop: '1px solid',
           borderColor: 'divider',
           justifyContent: open ? 'flex-start' : 'center',
         }}
       >
+        <MensajeriaWidget />
+        <ContactosWidget />
+        <Stack direction="row" sx={{ width: '100%', alignItems: 'center', justifyContent: open ? 'flex-start' : 'center', gap: 1 }}>
         <Avatar
           alt={usuario}
           src="/static/images/avatar/7.jpg"
@@ -132,6 +138,7 @@ export default function SideMenu({ usuario = "Usuario" }) {
         )}
 
         {open && <OptionsMenu />}
+        </Stack>
       </Stack>
     </Drawer>
     </SideMenuContext.Provider>

@@ -11,16 +11,19 @@ const renderRoutes = (routesToRender) =>
         protected: isProtected, 
         children, 
         roles,
-        redirectTo}, 
+        redirectTo,
+        index: isIndex }, 
         i
       ) => {
     
+    const routerProps = isIndex ? { index:true } : { path };
+
     // ✅ manejar redirección
     if (redirectTo) {
       return(
         <Route
         key={path || `route-${i}`}
-        path={path}
+        {...routerProps}
         element={<Navigate to={redirectTo} replace />}
         />
       )
@@ -37,14 +40,14 @@ const renderRoutes = (routesToRender) =>
     // Si tiene hijos, renderizar la ruta con anidación
     if (children?.length > 0) {
       return (
-        <Route key={path || `route-${i}`} path={path} element={element}>
+        <Route key={path || `route-${i}`} {...routerProps} element={element}>
           {renderRoutes(children)}
         </Route>
       );
     }
 
     // Ruta sin hijos
-    return <Route key={path || `route-${i}`} path={path} element={element} />;
+    return <Route key={path || `route-${i}`} {...routerProps} element={element} />;
   });
 
 export default function AppRouter() {

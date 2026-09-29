@@ -59,7 +59,7 @@ export const surfacesCustomizations = {
     styleOverrides: {
       root: ({ theme }) => {
         return {
-          padding: 16,
+          padding: 0,
           gap: 16,
           transition: 'all 100ms ease',
           backgroundColor: gray[50],

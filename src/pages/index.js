@@ -4,7 +4,7 @@
  */
 
 export * from './AdminPage'
-export * from './DashboardPages'
+export * from './DashboardIndexPage'
 export * from './NotFoundPage'
 export * from './PadronPage'
 export * from './Reports'

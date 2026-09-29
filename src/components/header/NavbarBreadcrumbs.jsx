@@ -30,7 +30,9 @@ export default function NavbarBreadcrumbs() {
     >
       {/* raíz */}
       <Typography sx={{ color: 'text.primary', fontWeight: 600 }}>
-        Dashboard
+        <Link component={RouterLink} to="/" underline="none" >
+          Panel Osssb
+        </Link>
       </Typography>
 
       {pathnames.map((value, index) => (

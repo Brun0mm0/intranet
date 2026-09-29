@@ -60,7 +60,7 @@ export default function LoginPage() {
         await login({usuario:usuario,password:password});
           // await login({usuario:usuario,password:80047707});
         // bruno.provenzano brun0330
-        navigate('/padrones');
+        navigate('/');
         return
       } catch (error) {
         alert("Error inicio de sesión")
