@@ -1,3 +1,6 @@
+const DEV_BYPASS_AUTH = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
+const DEV_MOCK_USER = {rol: Number(import.meta.env.VITE_DEV_MOCK_ROL) || 1, usuario: import.meta.env.VITE_DEV_MOCK_USUARIO || "dev"};
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import intranetApi from "../../api/intranetApi";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -20,6 +23,12 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if(hasCheckedAuth.current) return;
     hasCheckedAuth.current = true;
+
+    if (DEV_BYPASS_AUTH) {
+      setUser(DEV_MOCK_USER);
+      setLoading(false);
+      return;
+    }
 
     let active = true;
 

@@ -4,6 +4,7 @@ import { delay } from "../utils/utils";
 import { reset as ResetPadron } from "../store/padrones/padronSlice";
 import { reset as ResetAfiliacion } from "../store/afiliaciones/afiliacionesSlice";
 // import { logout } from '../auth/useAuth';
+const DEV_BYPASS_AUTH = import.meta.env.VITE_DEV_BYPASS_AUTH === 'false';
 
 const intranetApi = axios.create({
     // baseURL: '/api',   //PROD
@@ -30,6 +31,13 @@ intranetApi.interceptors.response.use(
 
     // 🔐 SESSION EXPIRED
     if (error.response?.status === 401) {
+      // En modo dev bypass, un 401 real del backend no debe tirar abajo la sesion mockeada ni reditigit a /login.
+
+      if (DEV_BYPASS_AUTH) {
+        console.warn('🧪 DEV_BYPASS_AUTH: se ignora 401 real del backend');
+        return Promise.reject(error);
+      }
+
       await delay(500);
       store.dispatch(ResetPadron());
       store.dispatch(ResetAfiliacion());
