@@ -1,5 +1,6 @@
 import DashboardLayout from '../layout/DashboardLayout';
 
+import DashboardIndexPage from '../pages/DashboardIndexPage';
 import LoginPage from '../auth/LoginPage';
 import AfiliacionesPage from '../pages/Afiliaciones/AfiliacionesPage';
 import {AdminPage} from '../pages/Admin/AdminPage';
@@ -11,6 +12,8 @@ import { PrestacionesPage } from '../pages/Prestaciones/PrestacionesPage';
 import PlagiarismRoundedIcon from '@mui/icons-material/PlagiarismRounded';
 import ForwardToInboxRoundedIcon from '@mui/icons-material/ForwardToInboxRounded';
 import { AvisoPagoPage } from '../pages/AvisoPago/AvisoPagoPage';
+import {UsuarioEditPage} from '../pages/usuarioEdit/UsuarioEditPage';
+import ContactosPage from '../pages/Contactos/ContactosPage';
 // import PaginaCrearUsuario from '../auth/PaginaCrearUsuario';
 
 
@@ -24,7 +27,8 @@ export const routes = [
     children: [
       {
         index: true,
-        redirectTo: '/login'
+        component: DashboardIndexPage,
+        protected: true,
       },
       {
         path: 'padrones',
@@ -62,14 +66,28 @@ export const routes = [
         icon: AdminPanelSettingsIcon,
         showInMenu: true
       },
+      // {
+      //   path: 'aviso-pago',
+      //   component: AvisoPagoPage,
+      //   protected: true,
+      //   roles: [1,8],
+      //   label: 'Aviso de Pago',
+      //   icon: ForwardToInboxRoundedIcon,
+      //   showInMenu: true,
+      // },
       {
-        path: 'aviso-pago',
-        component: AvisoPagoPage,
+        path: 'cambio-contrasena',
+        component: UsuarioEditPage,
         protected: true,
-        roles: [1,8],
-        label: 'Aviso de Pago',
-        icon: ForwardToInboxRoundedIcon,
-        showInMenu: true,
+        roles: [1, 2, 3, 4, 5, 6, 7, 8],
+        showInMenu: false,
+      },
+      {
+        path: 'contactos',
+        component: ContactosPage,
+        protected: true,
+        roles: [1, 2, 3, 4, 5, 6, 7, 8],
+        showInMenu: false,
       }
     ],
   },
