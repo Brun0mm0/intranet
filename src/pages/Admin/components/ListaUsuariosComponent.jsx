@@ -1,28 +1,29 @@
-import { Box, Paper, Stack, Table, TableBody, MenuItem, TableCell, TableContainer, TableHead, TableRow, Select } from '@mui/material'
-import { useEffect, useState } from 'react';
-import CircularProgress from '@mui/material/CircularProgress';
+import { useEffect, useState } from 'react'
+import {
+  Box, Stack, Table, TableBody, MenuItem, TableCell, TableContainer, TableHead, TableRow, Select, TablePagination, Typography,
+} from '@mui/material'
+import { ROLES, ROLES_IDS } from '../roles'
+import { formatCuilTexto } from '../../../utils/utils'
+import { tableHeadSx } from '../../../shared-theme/customizations/dataGrid'
 
 const columns = [
-  { id: 'NombreUsuario', label: 'Nombre de Usuario' },
+  { id: 'NombreUsuario', label: 'Usuario' },
   { id: 'Contrasena', label: 'Contraseña' },
   { id: 'Email', label: 'Email' },
   { id: 'cuil', label: 'CUIL' },
-  { id: 'Rol', label: 'Rol', align: 'center' },
+  { id: 'Rol', label: 'Rol' },
 ];
 
-const rolesMap = {
-1: 'Administrador',
-2: 'Usuario',
-3: 'Recursos Humanos',
-4: 'Empleado',
-5: 'Afiliaciones',
-6: 'Sucursales',
-7: 'Prestaciones'
-};
+const iniciales = (nombre = '') => nombre.slice(0, 2).toUpperCase();
+
+function RolDot({ rolId }) {
+  return <Box component="span" sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: ROLES[rolId]?.color ?? '#8a979d', flexShrink: 0 }} />;
+}
 
 export const ListaUsuariosComponent = ({ usuarios, onCambioRol, filaPendiente }) => {
-
   const [rolesLocales, setRolesLocales] = useState({});
+  const [pagina, setPagina] = useState(0);
+  const [porPagina, setPorPagina] = useState(25);
 
   useEffect(() => {
     const inicial = {};
@@ -30,61 +31,84 @@ export const ListaUsuariosComponent = ({ usuarios, onCambioRol, filaPendiente })
       inicial[usuario.id] = usuario.rol_id;
     });
     setRolesLocales(inicial);
-  },[usuarios])
+  }, [usuarios])
 
- const handleChangeRol = (usuario, nuevoRolId) => {
+  // Si cambia el filtro y la página actual quedó vacía, volver a la primera
+  useEffect(() => {
+    if (pagina * porPagina >= usuarios.length) setPagina(0);
+  }, [usuarios.length, pagina, porPagina]);
+
+  const handleChangeRol = (usuario, nuevoRolId) => {
     setRolesLocales(prev => ({ ...prev, [usuario.id]: nuevoRolId }));
     onCambioRol(usuario, nuevoRolId);
   };
 
+  const visibles = usuarios.slice(pagina * porPagina, pagina * porPagina + porPagina);
+
   return (
-    <Paper sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <TableContainer sx={{ flex: 1 }}>
-        <Table stickyHeader aria-label="sticky table">
+        <Table stickyHeader size="small" aria-label="Lista de usuarios">
           <TableHead>
-            <TableRow>
+            <TableRow sx={tableHeadSx}>
               {columns.map((column) => (
-                <TableCell key={column.id} align={column.align || 'left'} sx={{ padding: 1, fontWeight: 'bold' }}>
-                  {column.label}
-                </TableCell>
+                <TableCell key={column.id}>{column.label}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {usuarios.map((usuario) => {
+            {visibles.map((usuario) => {
               const isPendiente = filaPendiente === usuario.id
+              const rolActual = rolesLocales[usuario.id] ?? ''
 
               return (
-                <TableRow
-                  key={usuario.id}
-                  sx={{
-                    transition: 'background-color 0.3s ease',
-                    backgroundColor: isPendiente ? 'rgba(25, 118, 210, 0.08)' : 'inherit',
-                  }}
-                >
-                  <TableCell sx={{ padding: 1 }}>{usuario.NombreUsuario}</TableCell>
-                  <TableCell sx={{ padding: 1 }}>{usuario.Contrasena}</TableCell>
-                  <TableCell sx={{ padding: 1 }}>{usuario.Email}</TableCell>
-                  <TableCell sx={{ padding: 1 }}>{usuario.cuil}</TableCell>
-                  <TableCell align='center' sx={{ padding: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                <TableRow key={usuario.id} hover sx={{ '& td': { borderColor: '#edf1f3' } }}>
+                  <TableCell>
+                    <Stack direction="row" alignItems="center" spacing={1.25}>
+                      <Box
+                        sx={{
+                          width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                          bgcolor: ROLES[usuario.rol_id]?.color ?? '#0079a0', color: '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '0.72rem', fontWeight: 700,
+                        }}
+                      >
+                        {iniciales(usuario.NombreUsuario)}
+                      </Box>
+                      <Typography variant="body2" fontWeight={700}>{usuario.NombreUsuario}</Typography>
+                    </Stack>
+                  </TableCell>
+                  {/* Contraseña: sin cambios por ahora (pendiente de revisar) */}
+                  <TableCell>{usuario.Contrasena}</TableCell>
+                  <TableCell>{usuario.Email}</TableCell>
+                  <TableCell sx={{ fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{formatCuilTexto(usuario.cuil) ?? '—'}</TableCell>
+                  <TableCell>
+                    <Stack direction="row" alignItems="center" spacing={1}>
                       <Select
                         size="small"
-                        value={rolesLocales[usuario.id] ?? ''}
+                        value={rolActual}
                         onChange={(e) => handleChangeRol(usuario, Number(e.target.value))}
                         disabled={isPendiente}
-                        sx={{ minWidth: 180 }}
+                        aria-label={`Rol de ${usuario.NombreUsuario}`}
+                        sx={{ minWidth: 190, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 } }}
+                        renderValue={(id) => (
+                          <>
+                            <RolDot rolId={id} />
+                            {ROLES[id]?.label ?? 'Sin rol'}
+                          </>
+                        )}
                       >
-                        {Object.entries(rolesMap).map(([rolId, label]) => (
-                          <MenuItem key={rolId} value={Number(rolId)}>
-                            {label}
+                        {ROLES_IDS.map((rolId) => (
+                          <MenuItem key={rolId} value={rolId} sx={{ gap: 1 }}>
+                            <RolDot rolId={rolId} />
+                            {ROLES[rolId].label}
                           </MenuItem>
                         ))}
                       </Select>
                       {isPendiente && (
-                        <CircularProgress size={16} thickness={5} />
+                        <Typography variant="caption" sx={{ color: '#0079a0', fontWeight: 600 }}>Guardando…</Typography>
                       )}
-                    </Box>
+                    </Stack>
                   </TableCell>
                 </TableRow>
               )
@@ -92,6 +116,18 @@ export const ListaUsuariosComponent = ({ usuarios, onCambioRol, filaPendiente })
           </TableBody>
         </Table>
       </TableContainer>
-    </Paper>
+      <TablePagination
+        component="div"
+        count={usuarios.length}
+        page={pagina}
+        onPageChange={(e, p) => setPagina(p)}
+        rowsPerPage={porPagina}
+        onRowsPerPageChange={(e) => { setPorPagina(Number(e.target.value)); setPagina(0); }}
+        rowsPerPageOptions={[25, 50, 100]}
+        labelRowsPerPage="Filas por página:"
+        labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+        sx={{ borderTop: 1, borderColor: '#e1e8eb' }}
+      />
+    </Box>
   )
 }
