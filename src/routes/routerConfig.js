@@ -36,6 +36,7 @@ export const routes = [
         protected: true,
         roles: [1, 2, 3, 4, 5, 6, 7],
         label: 'Padrón',
+        description: 'Buscar afiliados por DNI, CUIL, N° de afiliado o apellido',
         icon: GroupsIcon,
         showInMenu: true
       },
@@ -45,6 +46,7 @@ export const routes = [
         protected: true,
         roles: [1, 5, 6],
         label: 'Credenciales',
+        description: 'Descargar la credencial de un afiliado',
         icon: MedicalInformationIcon,
         showInMenu: true
       },
@@ -54,6 +56,7 @@ export const routes = [
         protected: true,
         roles: [1, 7],
         label: 'Control de Facturas',
+        description: 'Comprobantes por proveedor',
         icon: PlagiarismRoundedIcon,
         showInMenu: true
       },
@@ -63,6 +66,7 @@ export const routes = [
         protected: true,
         roles: [1],
         label: 'Admin',
+        description: 'Usuarios y roles',
         icon: AdminPanelSettingsIcon,
         showInMenu: true
       },
