@@ -6,6 +6,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Typography from '@mui/material/Typography';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import { useSideMenu } from './SideMenuContext';
+import { navItemSx } from './navStyles';
 
 export default function MensajeriaWidget({ showBadge = false }) {
   const navigate = useNavigate();
@@ -17,16 +18,15 @@ export default function MensajeriaWidget({ showBadge = false }) {
   const content = (
     <ButtonBase
       onClick={() => navigate('/')}
-      aria-label="Mensajería"
+      aria-label="Novedades"
       sx={{
         display: 'flex',
         alignItems: 'center',
         gap: 1,
         width: '100%',
-        borderRadius: 1,
-        p: 0.75,
+        p: 1,
         justifyContent: open ? 'flex-start' : 'center',
-        '&:hover': { backgroundColor: 'action.hover' },
+        ...navItemSx(false),
       }}
     >
       <Badge
@@ -57,5 +57,5 @@ export default function MensajeriaWidget({ showBadge = false }) {
     </ButtonBase>
   );
 
-  return open ? content : <Tooltip title="Mensajería">{content}</Tooltip>;
+  return open ? content : <Tooltip title="Novedades" placement="right" arrow>{content}</Tooltip>;
 }

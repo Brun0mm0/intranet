@@ -123,11 +123,13 @@ export default function SideMenu({ usuario = "Usuario" }) {
         <MensajeriaWidget />
         <ContactosWidget />
         <Stack direction="row" sx={{ width: '100%', alignItems: 'center', justifyContent: open ? 'flex-start' : 'center', gap: 1 }}>
+        {/* Inicial del usuario sobre azul institucional (antes círculo gris) */}
         <Avatar
           alt={usuario}
-          src="/static/images/avatar/7.jpg"
-          sx={{ width: 36, height: 36 }}
-        />
+          sx={{ width: 36, height: 36, bgcolor: '#0079a0', color: '#fff', fontWeight: 700, fontSize: '0.95rem' }}
+        >
+          {usuario?.charAt(0)?.toUpperCase()}
+        </Avatar>
 
         {open && (
           <Box sx={{ mr: 'auto' }}>

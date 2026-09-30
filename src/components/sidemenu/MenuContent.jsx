@@ -1,11 +1,9 @@
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack } from '@mui/material';
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, Tooltip } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSideMenu } from './SideMenuContext';
 import { routes } from '../../routes/routerConfig';
 import { useAuth } from '../../auth';
-
-// 🎨 Color institucional — ícono del ítem de menú activo.
-const INSTITUTIONAL_COLOR = '#009ada';
+import { navItemSx } from './navStyles';
 
 export default function MenuContent() {
   const navigate = useNavigate();
@@ -40,21 +38,16 @@ export default function MenuContent() {
 
           return (
             <ListItem key={item.path} sx={{ display: 'block', paddingX: 0 }}>
+              {/* Con el menú cerrado, el nombre aparece al pasar el mouse */}
+              <Tooltip title={open ? '' : item.label} placement="right" arrow>
               <ListItemButton
                 selected={isSelected}
                 onClick={() => navigate(item.path)}
+                aria-label={item.label}
                 sx={{
-                  // ✅ El theme (dataDisplayCustomizations → MuiListItem)
-                  // define '.MuiListItem-root .MuiButtonBase-root.Mui-selected'
-                  // con más especificidad (3 clases) que este override — sin
-                  // !important, el fondo del theme sigue ganando.
-                  '&.Mui-selected': {
-                    backgroundColor: 'transparent !important',
-                    boxShadow: 'none',
-                  },
-                  '&.Mui-selected:hover': {
-                    backgroundColor: 'action.hover',
-                  },
+                  ...navItemSx(isSelected),
+                  justifyContent: open ? 'flex-start' : 'center',
+                  minHeight: 44,
                 }}
               >
                 <ListItemIcon
@@ -64,21 +57,13 @@ export default function MenuContent() {
                       duration: theme.transitions.duration.shortest,
                     }),
                     transform: open ? 'scale(1)' : 'scale(1.4)',
-                    // ✅ El theme (dataDisplayCustomizations → MuiListItem)
-                    // le fija `color` directo al <svg> (no al div padre),
-                    // tanto en estado normal como en .Mui-selected. La
-                    // herencia desde acá nunca le gana a eso — hace falta
-                    // apuntar al propio .MuiSvgIcon-root, con !important
-                    // para no depender del orden de inserción de estilos.
-                    '& .MuiSvgIcon-root': isSelected
-                      ? { color: `${INSTITUTIONAL_COLOR} !important` }
-                      : undefined,
                   })}
                 >
                   <Icon />
                 </ListItemIcon>
                 {open && <ListItemText primary={item.label} />}
               </ListItemButton>
+              </Tooltip>
             </ListItem>
           );
         })}

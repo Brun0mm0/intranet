@@ -1,14 +1,16 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import ButtonBase from '@mui/material/ButtonBase';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Typography from '@mui/material/Typography';
 import ContactPhoneRoundedIcon from '@mui/icons-material/ContactPhoneRounded';
 import { useSideMenu } from './SideMenuContext';
+import { navItemSx } from './navStyles';
 
 export default function ContactosWidget() {
   const navigate = useNavigate();
   const { open } = useSideMenu();
+  const activo = useLocation().pathname.startsWith('/contactos');
 
   // ✅ Mismo criterio que MensajeriaWidget: sin borde/fondo de botón, ícono
   // escalado cuando el side está colapsado, label solo cuando está abierto.
@@ -21,10 +23,9 @@ export default function ContactosWidget() {
         alignItems: 'center',
         gap: 1,
         width: '100%',
-        borderRadius: 1,
-        p: 0.75,
+        p: 1,
         justifyContent: open ? 'flex-start' : 'center',
-        '&:hover': { backgroundColor: 'action.hover' },
+        ...navItemSx(activo),
       }}
     >
       <ListItemIcon
@@ -43,5 +44,5 @@ export default function ContactosWidget() {
     </ButtonBase>
   );
 
-  return open ? content : <Tooltip title="Contactos">{content}</Tooltip>;
+  return open ? content : <Tooltip title="Contactos" placement="right" arrow>{content}</Tooltip>;
 }
