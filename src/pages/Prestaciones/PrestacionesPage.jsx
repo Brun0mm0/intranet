@@ -22,7 +22,7 @@ export const PrestacionesPage = () => {
 
 
   return (
-    <PageContainer id="prestaciones-page" title="Control de Facturas">
+    <PageContainer id="prestaciones-page">
       <Stack spacing={2} sx={{ flex: 1, minHeight: 0 }}>
         <PrestacionesBar 
           loading={loading} 

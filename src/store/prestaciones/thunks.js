@@ -1,12 +1,10 @@
 import intranetApi from "../../api/intranetApi";
-import { delay } from "../../utils/utils";
 import { startLoading, setError, setFacturas, setProveedor, resetState } from "./prestacionesSlice";
 
 export const fetchConsultaFacturas = (datos) => {
     return async (dispatch) => {
         const {param, value} = datos;
             dispatch(startLoading());
-        await delay(1000);
         
         try {
             const response = await intranetApi.get('/prestaciones_facturas/', {params:{[param]: value},
