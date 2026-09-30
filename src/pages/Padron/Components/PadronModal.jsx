@@ -1,10 +1,7 @@
 import { AfiliadoView } from "./AfiliadoView";
-import { AportesList } from "./AportesList";
 
-// ✅ Antes: un solo "type" ('afiliado' | 'aportes') decidía cuál de los
-// dos modales se mostraba, así que abrir Aportes desde adentro del
-// detalle cerraba el modal de detalle. Ahora son dos flags independientes:
-// pueden estar abiertos los dos a la vez (Aportes se apila arriba).
+// ✅ Un solo modal: el detalle del afiliado con pestañas. Aportes antes se abría
+// en un segundo modal apilado encima; ahora es la pestaña "Aportes".
 export default function PadronModal({
   afiliadoOpen,
   data,
@@ -12,35 +9,25 @@ export default function PadronModal({
   historial,
   handleCloseAfiliado,
   onImprimir,
-  onVerAportes,
-
-  aportesOpen,
+  tab,
+  onTabChange,
   aportes,
   aportesLoading,
-  handleCloseAportes,
 }) {
-  return (
-    <>
-      {afiliadoOpen && (
-        <AfiliadoView
-          data={data}
-          loading={detalleLoading}
-          historial={historial}
-          handleClose={handleCloseAfiliado}
-          open={afiliadoOpen}
-          onImprimir={onImprimir}
-          onVerAportes={onVerAportes}
-        />
-      )}
+  if (!afiliadoOpen) return null;
 
-      {aportesOpen && (
-        <AportesList
-          open={aportesOpen}
-          rows={aportes}
-          handleClose={handleCloseAportes}
-          loading={aportesLoading}
-        />
-      )}
-    </>
+  return (
+    <AfiliadoView
+      open={afiliadoOpen}
+      data={data}
+      loading={detalleLoading}
+      historial={historial}
+      handleClose={handleCloseAfiliado}
+      onImprimir={onImprimir}
+      tab={tab}
+      onTabChange={onTabChange}
+      aportes={aportes}
+      aportesLoading={aportesLoading}
+    />
   );
 }

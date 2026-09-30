@@ -10,17 +10,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { useState, useCallback, useMemo } from "react";
 import { fetchAportes, printConsultaPadron, fetchAfiliadoDetalle, fetchAfiliadoArr } from "../../store/padrones/thunks";
 import { resetAfiliadoDetalle, resetAportes, resetFiltroSecundario } from "../../store/padrones/padronSlice";
+import { CAMPO_APELLIDO_NOMBRE } from "./hooks/Usebusquedaautomatica";
 
 export default function PadronPage() {
 
   const dispatch = useDispatch();
 
-  // ✅ Antes: un único `modalType` decidía cuál de los dos modales se
-  // mostraba, así que abrir "Aportes" cerraba el modal de detalle del
-  // afiliado. Ahora son dos flags independientes — pueden convivir abiertos
-  // al mismo tiempo.
+  // ✅ Un solo modal de detalle con pestañas (Datos / Historial / Aportes).
+  // `aportesCuil` recuerda de qué CUIL están cargados los aportes, para no
+  // volver a pedirlos cada vez que se cambia de pestaña.
   const [afiliadoOpen, setAfiliadoOpen] = useState(false);
-  const [aportesOpen, setAportesOpen] = useState(false);
+  const [tab, setTab] = useState("datos");
+  const [aportesCuil, setAportesCuil] = useState(null);
 
   const {
     afiliadoArr,
@@ -76,25 +77,53 @@ export default function PadronPage() {
       return built;
     }
 
-    // ✅ Antes: startsWith sobre el string completo — un afiliado con
-    // "JUAN CARLOS" como Nombre nunca matcheaba si escribías "carlos"
-    // (no estaba al principio del string). Ahora se parte el campo en
-    // palabras y alcanza con que UNA de ellas empiece con el término.
-    const termino = filtroSecundario.toLowerCase();
+    // ✅ Se parte el texto en palabras y cada término tiene que ser el comienzo
+    // de alguna palabra. Con CAMPO_APELLIDO_NOMBRE ("peña luis", "gomez peralta")
+    // se busca en apellido y nombre juntos y tienen que coincidir todos los términos.
+    // Se comparan sin acentos y en minúsculas.
+    const sinAcentos = (t) => t.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+    const terminos = sinAcentos(filtroSecundario).split(/\s+/).filter(Boolean);
     return built.filter((row) => {
-      const valorCampo = (row[filtroSecundarioCampo] ?? "").toString().toLowerCase();
-      return valorCampo
-        .split(/\s+/)
-        .some((palabra) => palabra.startsWith(termino));
+      const texto = filtroSecundarioCampo === CAMPO_APELLIDO_NOMBRE
+        ? `${row.Apellido ?? ""} ${row.Nombre ?? ""}`
+        : (row[filtroSecundarioCampo] ?? "").toString();
+      const palabras = sinAcentos(texto).split(/\s+/);
+      return terminos.every((t) => palabras.some((palabra) => palabra.startsWith(t)));
     });
   }, [afiliadoArr, ultimoParametroBusqueda, filtroSecundario, filtroSecundarioCampo]);
 
+  const cargarAportes = useCallback((cuil) => {
+    if (!cuil || cuil === aportesCuil) return;
+    setAportesCuil(cuil);
+    dispatch(fetchAportes(cuil));
+  }, [aportesCuil, dispatch]);
+
   // ✅ Se abre el modal ya (con loading adentro) y se dispara la consulta
   // uno a uno por CUIL para traer el detalle completo del afiliado.
-  const handleInfoClick = useCallback((afiliado) => {
+  const abrirDetalle = useCallback((afiliado, pestaña = "datos") => {
+    dispatch(resetAportes());
+    setAportesCuil(null);
+    setTab(pestaña);
     setAfiliadoOpen(true);
     dispatch(fetchAfiliadoDetalle(afiliado.CUIL));
   }, [dispatch]);
+
+  const handleInfoClick = useCallback((afiliado) => abrirDetalle(afiliado), [abrirDetalle]);
+
+  // Desde la fila, "Aportes" abre el detalle directo en esa pestaña.
+  // ✅ El CUIL no lleva ningún código pegado al final — se usa tal cual viene del backend.
+  const handleAportesClick = useCallback((afiliado) => {
+    abrirDetalle(afiliado, "aportes");
+    setAportesCuil(afiliado.Cuil_titular);
+    dispatch(fetchAportes(afiliado.Cuil_titular));
+  }, [abrirDetalle, dispatch]);
+
+  const handleTabChange = (nuevaTab) => {
+    setTab(nuevaTab);
+    if (nuevaTab === "aportes") {
+      cargarAportes(afiliadoDetalle?.Cuil_titular ?? afiliadoDetalle?.CUIL);
+    }
+  };
 
   const handlePrintConsulta = (afiliado) => {
     dispatch(printConsultaPadron(afiliado));
@@ -102,18 +131,8 @@ export default function PadronPage() {
 
   const handleCloseAfiliado = useCallback(() => {
     setAfiliadoOpen(false);
+    setAportesCuil(null);
     dispatch(resetAfiliadoDetalle());
-  }, [dispatch]);
-
-  // ✅ Ya no toca el modal de detalle del afiliado — pueden estar los dos
-  // abiertos a la vez (Aportes se apila arriba).
-  const buscarAportes = (cuil) => {
-    dispatch(fetchAportes(cuil));
-    setAportesOpen(true);
-  }
-
-  const handleCloseAportes = useCallback(() => {
-    setAportesOpen(false);
     dispatch(resetAportes());
   }, [dispatch]);
 
@@ -133,7 +152,7 @@ export default function PadronPage() {
   };
 
   return (
-    <PageContainer id="padron-page" title="Padrón">
+    <PageContainer id="padron-page">
       <Stack spacing={2} sx={{ flex: 1, minHeight: 0 }}>
         <PadronesBar loading={loading} />
         <Stack
@@ -152,7 +171,7 @@ export default function PadronPage() {
               loading={loading}
               onInfoClick={handleInfoClick}
               onPrintConsulta={handlePrintConsulta}
-              fetchAportes={buscarAportes}
+              fetchAportes={handleAportesClick}
               onVerGrupoFamiliar={handleVerGrupoFamiliar}
             />
           </Box>
@@ -169,12 +188,10 @@ export default function PadronPage() {
           historial={afiliadoDetalle?.historial_coberturas || []}
           handleCloseAfiliado={handleCloseAfiliado}
           onImprimir={handlePrintConsulta}
-          onVerAportes={buscarAportes}
-
-          aportesOpen={aportesOpen}
+          tab={tab}
+          onTabChange={handleTabChange}
           aportes={aportes}
           aportesLoading={aportesLoading}
-          handleCloseAportes={handleCloseAportes}
         />
       </Stack>
     </PageContainer>

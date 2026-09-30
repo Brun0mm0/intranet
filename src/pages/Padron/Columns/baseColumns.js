@@ -30,22 +30,20 @@ export const PARENTESCO_COD = {
   Z: "Hijo/a Aportante",
 };
 
+// ✅ Columnas con ancho flexible (antes anchos fijos que dejaban 40% de la
+// tabla vacía y cortaban los títulos). "Apellido y nombre" está en
+// actionColumns.jsx porque necesita JSX para marcar los registros repetidos.
 export const baseColumns = [
-  { field: "Apellido", headerName: "Apellido", width: 150 },
-  { field: "Nombre", headerName: "Nombre", width: 150 },
-  { field: "Plan", headerName: "Plan", width: 80 },
-  { field: "Tipo_Doc", headerName: "Tipo", width: 40 },
   {
     field: "Parentesco",
     headerName: "Parentesco",
-    width: 130,
+    flex: 1,
+    minWidth: 130,
     // ✅ Antes mostraba directamente params.value (a veces null).
     // Ahora resuelve siempre por el código, con el texto crudo como
     // respaldo si el código no está en el diccionario.
-    renderCell: (params) => {
-      const cod = params.row.Parentesco_cod;
-      return PARENTESCO_COD[cod] ?? params.value ?? "—";
-    },
+    valueGetter: (value, row) => PARENTESCO_COD[row.Parentesco_cod] ?? value ?? "—",
   },
-  { field: "Sexo", headerName: "Sexo", width: 50 },
+  { field: "Plan", headerName: "Plan", flex: 0.6, minWidth: 80 },
+  { field: "Sexo", headerName: "Sexo", width: 70 },
 ];

@@ -1,109 +1,94 @@
-import { Box, Typography, Stack, Chip, Dialog, CircularProgress, DialogTitle, DialogContent, IconButton } from "@mui/material"
-import CloseIcon from "@mui/icons-material/Close";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
-import CircleIcon from '@mui/icons-material/Circle';
-import { DataGrid } from "@mui/x-data-grid"
+import { Box, CircularProgress, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import EstadoChip from "../../../components/common/EstadoChip";
+import { formatCuilTexto } from "../../../utils/utils";
+import { tableHeadSx } from "../../../shared-theme/customizations/dataGrid";
 
-export const AportesList = ({rows, open, handleClose, loading}) => {
-
-    const columns = [
-        { field: 'Periodo', 
-          headerName: 'Periodo', 
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flex: 1,
-          renderCell: (params) => {
-            const pendiente = params.row.APORTE;
-
-            return (
-            <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography>{params.row.Periodo}</Typography>
-                {pendiente ? (
-                <Chip label="OK" color="success" size="small" />
-                ) : (
-                <Chip label="Pendiente" color="warning" size="small" />
-                )}
-            </Stack>
-            );
-          }     
-        },
-        { field: 'Prestadora', headerName: 'Prestadora', flex: 1},
-        { field: 'CUIL', headerName: 'CUIL', flex: 1},
-        { field: 'CUIT', headerName: 'CUIT', flex: 1}
-    ]
-
-    const rowsConId = rows
-    .map((row, index) => ({
-        id: row.ID || index,
-        ...row,
-    }))
-
-  return (
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-            <DialogTitle>
-                <Typography fontWeight={600} fontSize="1rem">
-                    Aportes
-                </Typography>
-                <IconButton
-                    edge="end"
-                    onClick={handleClose}
-                    sx={{ position: "absolute", right: 20, top: 8 }}
-                >
-                    <CloseIcon />
-                </IconButton>
-            </DialogTitle>
-            <DialogContent>
-                {loading ? (
-                    <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
-                        <CircularProgress />
-                    </Box>
-                ) : rows.length === 0 ? (
-                    <Stack alignItems="center" justifyContent="center" minHeight={200}>
-                        <Typography>No hay aportes disponibles</Typography>
-                    </Stack>
-                ) : (
-                    <Box>
-                        <DataGrid
-                            sx={{
-                                "& .fila-activa": {
-                                    backgroundColor: "rgba(189, 218, 177, 1)",
-                                },
-                                "& .fila-pendiente": {
-                                    backgroundColor: "rgba(255, 233, 67, 1)",
-                                },
-                                "& .MuiDataGrid-row:hover": {
-                                    backgroundColor: "inherit"
-                                },
-                                borderRadius: 2,
-                            }}
-                            columns={columns}
-                            rows={rowsConId}
-                            getRowClassName={(params) =>
-                                params.row.APORTE ? "fila-activa" : "fila-pendiente"
-                            }
-                            disableRowSelectionOnClick
-                        />
-                        <Stack direction={"row"} spacing={2} marginTop={1} marginLeft={1}>
-                            <Typography variant="subtitle2" padding={0.5} paddingRight={1} borderRadius={1} sx={{ display: "flex", alignItems: "center", gap: 1, bgcolor: "#f5f5f5" }}>
-                                <CircleIcon
-                                    fontSize="small"
-                                    sx={{ color: "rgba(255, 233, 67, 1)" }}
-                                />
-                                Pendiente de pago
-                            </Typography>
-                            <Typography variant="subtitle2" padding={0.5} paddingRight={1} borderRadius={1} sx={{ display: "flex", alignItems: "center", gap: 1, bgcolor: "#f5f5f5" }}>
-                                <CircleIcon
-                                    fontSize="small"
-                                    sx={{ color: "rgba(189, 218, 177, 1)" }}
-                                />
-                                Acreditado
-                            </Typography>
-                        </Stack>
-                    </Box>
-                )}
-            </DialogContent>
-        </Dialog>
-    )
+function Kpi({ label, value, destacado }) {
+    return (
+        <Box
+            sx={{
+                flex: 1,
+                border: 1,
+                borderColor: destacado ? "#f0d58a" : "#e1e8eb",
+                bgcolor: destacado ? "#fffaeb" : "background.paper",
+                borderRadius: 2,
+                px: 2,
+                py: 1.25,
+            }}
+        >
+            <Typography variant="caption" sx={{ color: "#46565d", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                {label}
+            </Typography>
+            <Typography variant="h6" fontWeight={700} sx={{ fontVariantNumeric: "tabular-nums" }}>
+                {value}
+            </Typography>
+        </Box>
+    );
 }
+
+// 🔹 Contenido de la pestaña Aportes del detalle del afiliado.
+// ✅ Antes era un segundo modal apilado sobre el detalle, con filas enteras en
+// amarillo/verde + etiqueta + leyenda. Ahora: resumen arriba y solo etiquetas de estado.
+// Los aportes vienen ordenados del más reciente al más viejo (ver fetchAportes).
+export const AportesPanel = ({ rows = [], loading }) => {
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (rows.length === 0) {
+        return (
+            <Stack alignItems="center" justifyContent="center" minHeight={200}>
+                <Typography color="text.secondary">No hay aportes disponibles para este afiliado.</Typography>
+            </Stack>
+        );
+    }
+
+    const pendientes = rows.filter((r) => !r.APORTE);
+    const acreditados = rows.filter((r) => r.APORTE);
+
+    return (
+        <Stack spacing={2}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+                <Kpi
+                    label={pendientes.length === 1 ? "Período pendiente" : "Períodos pendientes"}
+                    value={pendientes.length ? pendientes.map((r) => r.Periodo).join(" · ") : "Ninguno"}
+                    destacado={pendientes.length > 0}
+                />
+                <Kpi label="Acreditados" value={`${acreditados.length} de ${rows.length} períodos`} />
+                <Kpi label="Último acreditado" value={acreditados[0]?.Periodo ?? "—"} />
+            </Stack>
+
+            <Box sx={{ border: 1, borderColor: "#e1e8eb", borderRadius: 2, overflow: "hidden" }}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow sx={tableHeadSx}>
+                            <TableCell>Período</TableCell>
+                            <TableCell>Estado</TableCell>
+                            <TableCell>Prestadora</TableCell>
+                            <TableCell>CUIT empleador</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {rows.map((row, i) => (
+                            <TableRow key={row.ID ?? i} hover>
+                                <TableCell sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{row.Periodo}</TableCell>
+                                <TableCell>
+                                    <EstadoChip
+                                        estado={row.APORTE ? "vigente" : "pendiente"}
+                                        label={row.APORTE ? "Acreditado" : "Pendiente"}
+                                    />
+                                </TableCell>
+                                <TableCell>{row.Prestadora ?? "—"}</TableCell>
+                                <TableCell sx={{ fontVariantNumeric: "tabular-nums" }}>{formatCuilTexto(row.CUIT) ?? "—"}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </Box>
+        </Stack>
+    );
+};

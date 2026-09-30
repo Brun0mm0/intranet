@@ -113,3 +113,65 @@ export const copyToClipboard = async (text) => {
     document.body.removeChild(textarea);
   }
 };
+// 🔹 Formateo para mostrar datos del padrón (no se usan para enviar al backend)
+
+// "2022-12-01" → "01/12/2022". Si ya viene como DD/MM/YYYY (o no es fecha) se devuelve igual.
+export const formatFecha = (fechaStr) => {
+    if (!fechaStr) return null;
+    const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(fechaStr));
+    return iso ? `${iso[3]}/${iso[2]}/${iso[1]}` : String(fechaStr);
+};
+
+// 20360754279 → "20-36075427-9". Si no tiene 11 dígitos se devuelve igual.
+export const formatCuilTexto = (cuil) => {
+    if (cuil == null || cuil === '') return null;
+    const digitos = String(cuil).replace(/\D/g, '');
+    return digitos.length === 11 ? formatCuil(digitos) : String(cuil);
+};
+
+// 36075427 → "36.075.427"
+export const formatDni = (dni) => {
+    if (dni == null || dni === '') return null;
+    const digitos = String(dni).replace(/\D/g, '');
+    return digitos ? Number(digitos).toLocaleString('es-AR') : String(dni);
+};
+
+// Limpia texto que llega sucio del backend: espacios de más, "SAN MARTIN ,PTDO." y separadores colgando ("1167800827 /").
+export const limpiarTexto = (texto) => {
+    if (texto == null) return null;
+    const limpio = String(texto)
+        .replace(/\s+/g, ' ')
+        .replace(/\s+,/g, ',')
+        .replace(/,(?=\S)/g, ', ')
+        .replace(/[\s/,;-]+$/, '')
+        .replace(/^[\s/,;-]+/, '')
+        .trim();
+    return limpio || null;
+};
+
+// "GRAN BUENOS AIRES ZONA OESTE 1" → "Gran Buenos Aires Zona Oeste 1". Siglas cortas sin vocales (DU, CP) quedan igual.
+const MINUSCULAS = new Set(['de', 'del', 'la', 'las', 'los', 'el', 'y', 'e', 'en', 'a', 'al', 'por', 'con']);
+export const capitalizar = (texto) => {
+    const limpio = limpiarTexto(texto);
+    if (!limpio) return null;
+    return limpio
+        .toLowerCase()
+        .split(' ')
+        .map((palabra, i) => {
+            if (i > 0 && MINUSCULAS.has(palabra)) return palabra;
+            if (palabra.length <= 3 && !/[aeiouáéíóú]/.test(palabra) && /[a-zñ]/.test(palabra)) return palabra.toUpperCase();
+            return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+        })
+        .join(' ');
+};
+
+// Edad en años a partir de "DD/MM/YYYY" o "YYYY-MM-DD"
+export const calcularEdad = (fechaStr) => {
+    const nac = parseFechaLocal(fechaStr);
+    if (!nac || isNaN(nac)) return null;
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - nac.getFullYear();
+    const cumplioEsteAnio = hoy.getMonth() > nac.getMonth() || (hoy.getMonth() === nac.getMonth() && hoy.getDate() >= nac.getDate());
+    if (!cumplioEsteAnio) edad -= 1;
+    return edad >= 0 ? edad : null;
+};
