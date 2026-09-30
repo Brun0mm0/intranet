@@ -1,29 +1,12 @@
 import { Box, Typography, Stack, Divider, Link } from "@mui/material";
-import { useAuth } from "../../auth";
-import { routes } from "../../routes/routerConfig";
+import { useAccesosRapidos } from "../../hooks/useAccesosRapidos";
+import { LINKS_DE_INTERES } from "../../config/linksDeInteres";
 import RelojWidget from "../widgets/RelojWidget";
 import ClimaWidget from "../widgets/ClimaWidget";
 import AccesoRapidoCard from "../linksCard/AccesoRapidoCard";
 
-const LINKS_DE_INTERES = [
-    { path: 'https://www.argentina.gob.ar/sssalud', label: 'Super Intendencia de Salud' },
-    { path: 'https://policlinicabancaria.portalpaciente.axonico.ar/', label: 'Portal Poba' },
-    { path: 'http://130.130.205.56', label: 'Onexa' },
-    { path: 'https://www.osssb.com/', label: 'Osssb' },
-    { path: 'https://www.policlinicabancaria.com.ar/', label: 'Poba' },
-    { path: 'https://labancaria.org/', label: 'La Bancaria' },
-];
-
 export default function PanelLateral() {
-    const { user } = useAuth();
-
-    // `routes` se lee en render (no a nivel módulo) por el import circular con routerConfig
-    const dashboardRoutes = routes.find((r) => r.path === "/");
-    const menuItems = dashboardRoutes?.children?.filter((r) => r.showInMenu) ?? [];
-
-    const accesibles = menuItems.filter(
-        (items) => !items.roles?.length || items.roles.includes(user?.rol)
-    );
+    const accesibles = useAccesosRapidos();
 
     return (
         <Box

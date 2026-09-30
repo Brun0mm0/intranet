@@ -1,16 +1,5 @@
-import { useEffect, useState } from "react";
+import { useReloj } from "../../hooks/useReloj";
 import { Typography } from "@mui/material";
-
-function useReloj() {
-  const [ahora, setAhora] = useState(new Date());
-
-  useEffect(() => {
-    const id = setInterval(() => setAhora(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  return ahora;
-}
 
 export default function RelojWidget() {
   const ahora = useReloj();

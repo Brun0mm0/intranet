@@ -12,11 +12,7 @@ const MENSAJE_BIENVENIDA = {
 export default function MensajeriaPanel() {
     return (
         <Box height="100%" display="flex" flexDirection="column" width="100%">
-            <Typography variant="h4" gutterBottom>
-                Novedades
-            </Typography>
-
-            <Box flexGrow={1} display="flex" alignItems="flex-start" justifyContent="center" pt={4} width="100%"> 
+            <Box flexGrow={1} display="flex" alignItems="flex-start" justifyContent="center" width="100%">
                 <Stack direction="row" spacing={2} alignItems="flex-start" width="100%" >
                     <Avatar sx={{ bgcolor: "primary.main" }}>
                         <ForumRoundedIcon />
