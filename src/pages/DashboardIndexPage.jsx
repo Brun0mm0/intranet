@@ -3,6 +3,7 @@ import { useAuth } from "../auth";
 import AccesoRapidoCard from "../components/linksCard/AccesoRapidoCard";
 import MensajeriaPanel from "../components/dashboard/MensajeriaPanel";
 import PanelLateral from "../components/dashboard/PanelLateral";
+import PageContainer from "../components/common/PageContainer";
 
 export default function DashboardIndexPage() {
     const { user } = useAuth();
@@ -13,21 +14,9 @@ export default function DashboardIndexPage() {
     ]
 
     return (
-    <Box sx={{
-        bgcolor: 'rgba(255, 255, 255, 0.5)',
-        backdropFilter: 'blur(10px)',
-        }}  
-        width="100%" 
-        height="100%" 
-        borderRadius={2} 
-        p={2} 
-        display="flex" 
-        gap={2} 
-        flexDirection="row" 
-        justifyContent="space-between" 
-        alignItems="start">
-        <Box width={'85%'} height="100%" display="flex" flexDirection="column" alignItems="start" justifyContent="start" gap={2} >
-           <Grid container width="100%" height="100%">
+    <PageContainer direction="row" justifyContent="space-between" alignItems="stretch">
+        <Box width={'85%'} minHeight={0} display="flex" flexDirection="column" alignItems="start" justifyContent="start" gap={2} >
+           <Grid container width="100%" flexGrow={1} minHeight={0}>
                 <Grid
                     item
                     size={4}
@@ -57,6 +46,6 @@ export default function DashboardIndexPage() {
         </Box>
 
         <PanelLateral />
-    </Box>
+    </PageContainer>
     )
 }

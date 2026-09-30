@@ -1,24 +1,11 @@
 import { Box, Typography, Grid, Stack } from '@mui/material';
+import PageContainer from '../../components/common/PageContainer';
 import PanelLateral from '../../components/dashboard/PanelLateral';
 import ContactosListado from './components/ContactosListado';
 
 export default function ContactosPage() {
     return (
-        <Box sx={{
-            bgcolor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(10px)',
-        }}
-            width="100%"
-            flexGrow={1}
-            minHeight={0}
-            borderRadius={2}
-            p={2}
-            display="flex"
-            gap={2}
-            flexDirection="row"
-            justifyContent="space-between"
-            alignItems="stretch"
-        >
+        <PageContainer direction="row" justifyContent="space-between" alignItems="stretch">
             <Box width={'85%'} minHeight={0} display="flex" flexDirection="column" alignItems="start" justifyContent="start" gap={2}>
                 <Grid container width="100%" flexGrow={1} minHeight={0}>
                     <Grid
@@ -55,6 +42,6 @@ export default function ContactosPage() {
             </Box>
 
             <PanelLateral />
-        </Box>
+        </PageContainer>
     );
 }

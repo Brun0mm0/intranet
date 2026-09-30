@@ -3,6 +3,7 @@ import useForm from "../../../hooks/useForm"
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCredenciales } from "../../../store/afiliaciones/thunks";
 import { SearchInput } from "../../../components/inputs/SearchInput";
+import { accionButtonSx, panelSx } from "../../../shared-theme/customizations/intranetStyles";
 
 export const AfiliacionesCredencial = () => {
 
@@ -36,7 +37,7 @@ export const AfiliacionesCredencial = () => {
     }
 
   return (
-    <Box sx={{width:'100%'}} display={"flex"} bgcolor={'#fff'} borderRadius={1} paddingX={2} paddingY={2} boxShadow={2}>
+    <Box sx={{width:'100%', ...panelSx}} display={"flex"} paddingX={2} paddingY={2}>
         <Stack flexGrow={1} direction={"column"} alignItems={"start"}>
             <Typography variant="subtitle1">Descargue la credencial del afiliado</Typography>
             <Typography variant="subtitle2">Ingrese el número de DNI del afiliado para descargar la credencial.</Typography>
@@ -45,7 +46,7 @@ export const AfiliacionesCredencial = () => {
             <Stack direction={"row"} display={"flex"} justifyContent={"end"} alignItems={'center'} gap={2}>
                 <SearchInput name='dni' value={values.dni} onChange={handleChange} placeholder="Ingrese número de dni"></SearchInput>
                     <Box display="flex" justifyContent="center">
-                        <Button variant="outlined" type="submit" loading={loading}>
+                        <Button variant="outlined" type="submit" loading={loading} sx={accionButtonSx}>
                             Descargar
                         </Button>
                     </Box>

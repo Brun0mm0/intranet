@@ -6,6 +6,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import * as XLSX from "xlsx";
+import { panelSx } from "../../../shared-theme/customizations/intranetStyles";
 
 
 export const PrestacionesTabla = ({
@@ -81,10 +82,9 @@ export const PrestacionesTabla = ({
         flexGrow: 1,
         display: "flex",
         width: "100%",
-        height: "400px",
+        minHeight: 0,
         flexDirection: "column",
-        backgroundColor: "#fff",
-        borderRadius: 2,
+        ...panelSx,
         padding: 1,
         paddingY: 2,
       }}

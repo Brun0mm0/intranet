@@ -5,6 +5,8 @@ import { fetchUsuarios, fetchActualizarRol } from '../../store/admin/thunk'
 import { useDispatch, useSelector } from 'react-redux'
 import { ListaUsuariosComponent } from './components/ListaUsuariosComponent'
 import SearchIcon from '@mui/icons-material/Search';
+import PageContainer from '../../components/common/PageContainer'
+import { accionButtonSx, panelSx } from '../../shared-theme/customizations/intranetStyles'
 
 export const AdminPage = () => {
   
@@ -44,18 +46,10 @@ export const AdminPage = () => {
   }
   
   return (
-    <Box 
-      borderRadius={2} 
-      sx={{
-        display:'flex', 
-        width:'100%', 
-        height:'100%', 
-        flexDirection:{ xs:'column', md:'row'}, 
-        gap:3, 
-        paddingBottom:2
-        }}>
-      <Stack flex={1} padding={2} sx={{backgroundColor:'#fff', borderRadius:2}}>
-        <Typography variant='subtitle1' sx={{fontSize:'1.5rem'}}>Lista de usuarios</Typography>
+    <PageContainer title="Administración">
+      <Box sx={{ display:'flex', flex:1, minHeight:0, flexDirection:{ xs:'column', md:'row'}, gap:2 }}>
+      <Stack flex={1} minHeight={0} padding={2} sx={panelSx}>
+        <Typography variant='h5'>Lista de usuarios</Typography>
         { !listaVisible && (
         <Button 
           variant='outlined' 
@@ -63,13 +57,7 @@ export const AdminPage = () => {
           startIcon={loadingUsuarios && <CircularProgress size={14} thickness={5} />}
           sx={{
                 marginTop:'2rem',
-                borderColor: '#009ada80',
-                bgcolor: '#41a5cf33',
-                transition: 'all 0.3s ease',
-                '&:hover': { 
-                  bgcolor: '#19a4df80',
-                  fontSize:'1rem',
-                }
+                ...accionButtonSx,
             }} 
           disabled={listaVisible}>
            {loadingUsuarios ? 'Cargando...' : 'Ver usuarios'}
@@ -77,7 +65,7 @@ export const AdminPage = () => {
         )
         }
         { listaVisible && (
-          <Stack>
+          <Stack flex={1} minHeight={0}>
             <TextField
               size="small"
               placeholder="Buscar por nombre de usuario..."
@@ -101,10 +89,11 @@ export const AdminPage = () => {
         )
         }
       </Stack>
-      <Stack flex={.3}sx={{backgroundColor:'#fff', borderRadius:2}} padding={2}>
-        <Typography variant='subtitle1' sx={{fontSize:'1.5rem'}}>Crear usuarios</Typography>        
+      <Stack flex={.3} sx={panelSx} padding={2}>
+        <Typography variant='h5'>Crear usuarios</Typography>
         <CrearUsuariosComponent />
       </Stack>
-    </Box>    
+      </Box>
+    </PageContainer>
   )
 }

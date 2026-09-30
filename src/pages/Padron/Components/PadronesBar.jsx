@@ -15,6 +15,7 @@ import useForm from "../../../hooks/useForm";
 import { fetchAfiliadoArr } from "../../../store/padrones/thunks";
 import { useDispatch } from "react-redux";
 import { SearchInput } from "../../../components/inputs/SearchInput";
+import { accionButtonSx, panelSx } from "../../../shared-theme/customizations/intranetStyles";
 import { useBusquedaAutomatica } from "../hooks/useBusquedaAutomatica";
 import { validarInputPadron } from "../../../utils/Validarinputpadron";
 
@@ -86,8 +87,7 @@ export default function PadronesBar({ loading }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderRadius: 1,
-          backgroundColor: "background.paper",
+          ...panelSx,
           py: 1,
           px: 2,
         }}
@@ -158,11 +158,7 @@ export default function PadronesBar({ loading }) {
           <Stack direction={"row"} spacing={1}>
             <Button
               type="submit"
-              sx={{
-                borderColor: "rgba(0, 154, 218, 0.5)",
-                bgcolor: "rgba(65, 165, 207, 0.2)",
-                "&:hover": { bgcolor: "rgba(59, 172, 221, 0.5)" },
-              }}
+              sx={accionButtonSx}
               size="large"
               variant="outlined"
               loading={loading}

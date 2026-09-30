@@ -1,4 +1,5 @@
 import { Box, Stack } from "@mui/material";
+import PageContainer from "../../components/common/PageContainer";
 import PadronesBar from "./Components/PadronesBar";
 import PadronesList from "./Components/PadronesList";
 import PadronModal from "./Components/PadronModal";
@@ -132,17 +133,8 @@ export default function PadronPage() {
   };
 
   return (
-    <Box
-      component="section"
-      id="padron-page"
-      sx={{
-        flexGrow: 1,
-        display: "flex",
-        width: "100%",
-        flexDirection: "column",
-      }}
-    >
-      <Stack spacing={2} sx={{ height: "100%" }}>
+    <PageContainer id="padron-page" title="Padrón">
+      <Stack spacing={2} sx={{ flex: 1, minHeight: 0 }}>
         <PadronesBar loading={loading} />
         <Stack
           direction="row"
@@ -185,6 +177,6 @@ export default function PadronPage() {
           handleCloseAportes={handleCloseAportes}
         />
       </Stack>
-    </Box>
+    </PageContainer>
   );
 }

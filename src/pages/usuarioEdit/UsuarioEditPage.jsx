@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux'
 import useForm from '../../hooks/useForm'
 import intranetApi from '../../api/intranetApi'
 import { showNotification } from '../../store/notification/notificationSlice'
+import PageContainer from '../../components/common/PageContainer'
+import { accionButtonSx, panelSx } from '../../shared-theme/customizations/intranetStyles'
 
 export const UsuarioEditPage = () => {
     const dispatch = useDispatch();
@@ -43,22 +45,10 @@ export const UsuarioEditPage = () => {
     };
 
     return (
-        <Box sx={{
-            bgcolor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(10px)',
-                    }}
-                    width="100%"
-                    height="100%"
-                    borderRadius={2}
-                    p={2}
-                    display="flex"
-                    gap={2}
-                    flexDirection="column"
-                    alignItems="center">
-        <Typography width={'100%'} variant='h3' align='left'>Cambio de Contraseña</Typography>
+        <PageContainer title="Cambio de Contraseña" alignItems="center">
         <Box flexGrow={1} width="100%" display="flex" alignItems="center" justifyContent="center">
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-            <Stack spacing={1} border={1} borderColor={"#dad9d9"} py={3} borderRadius={2} sx={{ maxWidth: 600, padding: 3, margin: "auto", backgroundColor: "#fff" }}>
+            <Stack spacing={1} sx={{ ...panelSx, maxWidth: 600, padding: 3, margin: "auto" }}>
                 <FormControl margin='dense'>
                     <FormLabel><Typography variant='subtitle1'>Nueva contraseña</Typography></FormLabel>
                     <TextField
@@ -118,9 +108,7 @@ export const UsuarioEditPage = () => {
                     type='submit'
                     sx={{
                         minWidth: 240,
-                        borderColor: '#009ada80',
-                        bgcolor: '#41a5cf33',
-                        '&:hover': { bgcolor: '#19a4df80' },
+                        ...accionButtonSx,
                     }}
                     >
                     <Typography variant='button'>Cambiar contraseña</Typography>
@@ -129,6 +117,6 @@ export const UsuarioEditPage = () => {
             </Stack>
         </form>
         </Box>
-    </Box>
+        </PageContainer>
     )
 }

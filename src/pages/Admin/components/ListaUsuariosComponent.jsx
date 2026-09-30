@@ -38,8 +38,8 @@ export const ListaUsuariosComponent = ({ usuarios, onCambioRol, filaPendiente })
   };
 
   return (
-    <Paper>
-      <TableContainer sx={{ height: 'calc(100vh - 180px)' }}>
+    <Paper sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+      <TableContainer sx={{ flex: 1 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>

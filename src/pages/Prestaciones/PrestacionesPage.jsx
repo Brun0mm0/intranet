@@ -1,4 +1,5 @@
-import { Box, Stack } from '@mui/material'
+import { Stack } from '@mui/material'
+import PageContainer from '../../components/common/PageContainer'
 import { PrestacionesBar } from './componentes/PrestacionesBar'
 import { useDispatch, useSelector } from 'react-redux'
 import { PrestacionesTabla } from './componentes/PrestacionesTabla'
@@ -21,17 +22,8 @@ export const PrestacionesPage = () => {
 
 
   return (
-   <Box
-      component="section"
-      id="padron-page"
-      sx={{
-        flexGrow: 1,
-        display: "flex",
-        width: "100%",
-        flexDirection: "column",
-      }}
-    >
-      <Stack spacing={2} sx={{ height: "100%" }}>
+    <PageContainer id="prestaciones-page" title="Control de Facturas">
+      <Stack spacing={2} sx={{ flex: 1, minHeight: 0 }}>
         <PrestacionesBar 
           loading={loading} 
           errorText={error}
@@ -44,6 +36,6 @@ export const PrestacionesPage = () => {
           searchParam={activeParam}
           />
       </Stack>
-    </Box>
+    </PageContainer>
   )
 }

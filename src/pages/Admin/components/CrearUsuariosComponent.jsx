@@ -3,6 +3,7 @@ import useForm from '../../../hooks/useForm'
 import { formatCuil } from '../../../utils/utils'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchNuevoUsuario } from '../../../store/admin/thunk'
+import { accionButtonSx } from '../../../shared-theme/customizations/intranetStyles'
 
 export const CrearUsuariosComponent = () => {
     const dispatch = useDispatch()
@@ -104,9 +105,7 @@ export const CrearUsuariosComponent = () => {
                 fullWidth 
                 sx={{
                     marginTop:'2rem',
-                    borderColor: '#009ada80',
-                    bgcolor: '#41a5cf33',
-                    '&:hover': { bgcolor: '#19a4df80' },
+                    ...accionButtonSx,
                 }}
                     >
                 <Typography variant='button'>Crear</Typography>
