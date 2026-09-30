@@ -4,7 +4,7 @@ import { AfiliacionesCredencial } from "./components/AfiliacionesCredencial"
 
 export default function AfiliacionesPage() {
     return (
-        <PageContainer title="Credenciales" alignItems="center">
+        <PageContainer alignItems="center">
             <AfiliacionesCredencial />
         </PageContainer>
     )

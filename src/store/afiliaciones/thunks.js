@@ -1,5 +1,4 @@
 import intranetApi from '../../api/intranetApi'
-import { delay } from "../../utils/utils.js"
 import {setAfiliado,setError,setLoading} from './afiliacionesSlice'
 import { showNotification } from '../notification/notificationSlice.js'
 
@@ -8,7 +7,6 @@ export const fetchCredenciales = (datos) => {
     return async (dispatch) => {
         dispatch(setLoading(true))
         try {
-            await delay(1000);
             const {data} = await intranetApi.get(`credencial`, {params: {['dni']:dni}});
             if (data.success) {
                 dispatch(setLoading(false));
