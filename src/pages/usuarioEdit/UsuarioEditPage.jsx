@@ -45,7 +45,7 @@ export const UsuarioEditPage = () => {
     };
 
     return (
-        <PageContainer title="Cambio de Contraseña" alignItems="center">
+        <PageContainer alignItems="center">
         <Box flexGrow={1} width="100%" display="flex" alignItems="center" justifyContent="center">
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
             <Stack spacing={1} sx={{ ...panelSx, maxWidth: 600, padding: 3, margin: "auto" }}>

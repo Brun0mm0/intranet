@@ -77,6 +77,7 @@ export const routes = [
       // },
       {
         path: 'cambio-contrasena',
+        label: 'Cambio de contraseña',
         component: UsuarioEditPage,
         protected: true,
         roles: [1, 2, 3, 4, 5, 6, 7, 8],
@@ -84,6 +85,7 @@ export const routes = [
       },
       {
         path: 'contactos',
+        label: 'Contactos',
         component: ContactosPage,
         protected: true,
         roles: [1, 2, 3, 4, 5, 6, 7, 8],

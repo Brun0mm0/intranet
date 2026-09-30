@@ -7,10 +7,10 @@ export const accionButtonSx = {
     "&:hover": { bgcolor: "rgba(59, 172, 221, 0.5)" },
 };
 
-// Panel blanco dentro de un PageContainer (barras de búsqueda, tablas, formularios)
+// Tarjeta blanca plana (barras de búsqueda, tablas, formularios, bloques del inicio)
 export const panelSx = {
     bgcolor: "background.paper",
-    borderRadius: 2,
+    borderRadius: 3,
     border: 1,
-    borderColor: "#d1d1d1",
+    borderColor: "#e1e8eb",
 };

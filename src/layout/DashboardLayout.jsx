@@ -24,7 +24,7 @@ export default function DashboardLayout({themeComponents}) {
                     sx={(theme) => ({
                         flexGrow: 1,
                         height: '100dvh',
-                        backgroundImage:"linear-gradient(345deg, rgba(0,169,218,.5) 0%, rgba(175,218,237,0.3) 25%, rgba(175,218,237,0.3) 75%, rgba(2,181,126,.5) 100%)",   
+                        bgcolor: '#f4f7f9',
                         overflow: 'auto',
                     })}
                 >
