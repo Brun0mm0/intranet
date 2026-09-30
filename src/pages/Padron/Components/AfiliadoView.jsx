@@ -27,10 +27,10 @@ import {
 import { calcularEdad, capitalizar, estaVigente, formatCuilTexto, formatDni, formatFecha, limpiarTexto } from "../../../utils/utils";
 import EstadoChip from "../../../components/common/EstadoChip";
 import { MARINO, tableHeadSx } from "../../../shared-theme/customizations/dataGrid";
+import { BANNER_BG } from "../../../shared-theme/customizations/intranetStyles";
 import { PARENTESCO_COD } from "../Columns/baseColumns";
 import { AportesPanel } from "./AportesList";
 
-const BANNER_BG = "linear-gradient(110deg, #0092c0 0%, #00a9da 45%, #02b57e 100%)";
 const SEXO = { M: "Masculino", F: "Femenino" };
 
 const SIN_DATO_SX = { color: "#8a979d", fontStyle: "italic", fontWeight: 400 };

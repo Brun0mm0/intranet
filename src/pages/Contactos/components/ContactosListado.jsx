@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
-import { Box, Button, ButtonBase, Chip, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import ContactPhoneRoundedIcon from "@mui/icons-material/ContactPhoneRounded";
-import { SearchInput } from "../../../components/inputs/SearchInput";
+import PageHeader, { HeaderField, HeaderPills } from "../../../components/common/PageHeader";
 import { panelSx } from "../../../shared-theme/customizations/intranetStyles";
 import { MARINO } from "../../../shared-theme/customizations/dataGrid";
 import { AREAS, areaDe, buscarInternos, TOTAL_INTERNOS } from "../utils/buscarInternos";
 
-const BANNER_BG = "linear-gradient(110deg, #0092c0 0%, #00a9da 45%, #02b57e 100%)";
 const AREAS_VISIBLES = 10;
 
 const CAMPOS = [
@@ -52,75 +51,26 @@ export default function ContactosListado() {
 
     return (
         <Stack spacing={2} flex={1} minHeight={0} width="100%">
-            {/* Encabezado con el degradado institucional: búsqueda */}
-            <Box
-                sx={{
-                    backgroundImage: BANNER_BG,
-                    borderRadius: 3,
-                    px: 2.5,
-                    py: 1.5,
-                    color: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 2.5,
-                    flexWrap: "wrap",
-                }}
-            >
-                <Stack direction="row" alignItems="center" spacing={1} flexShrink={0}>
-                    <ContactPhoneRoundedIcon />
-                    <Typography variant="h6" fontWeight={700} color="inherit" noWrap>
-                        Contactos
+            {/* Encabezado institucional: búsqueda */}
+            <PageHeader
+                icon={<ContactPhoneRoundedIcon />}
+                title="Contactos"
+                actions={
+                    <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.95)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                        {resultados.length} de {TOTAL_INTERNOS} internos
                     </Typography>
-                </Stack>
-
-                <Stack
-                    direction="row"
-                    role="radiogroup"
-                    aria-label="Buscar por"
-                    sx={{ bgcolor: "rgba(255,255,255,0.18)", borderRadius: 99, p: 0.5, gap: 0.25, flexShrink: 0 }}
-                >
-                    {CAMPOS.map((c) => {
-                        const activo = campo === c.value;
-                        return (
-                            <ButtonBase
-                                key={c.value}
-                                role="radio"
-                                aria-checked={activo}
-                                onClick={() => setCampo(c.value)}
-                                sx={{
-                                    px: 1.75,
-                                    py: 0.75,
-                                    borderRadius: 99,
-                                    fontWeight: 700,
-                                    fontSize: "0.9rem",
-                                    color: activo ? "#0079a0" : "#fff",
-                                    bgcolor: activo ? "#fff" : "transparent",
-                                    transition: "background-color 120ms",
-                                    "&:hover": { bgcolor: activo ? "#fff" : "rgba(255,255,255,0.2)" },
-                                    "&.Mui-focusVisible": { outline: "2px solid #fff", outlineOffset: 2 },
-                                }}
-                            >
-                                {c.label}
-                            </ButtonBase>
-                        );
-                    })}
-                </Stack>
-
-                <Box flex={1} minWidth={260}>
-                    <SearchInput
-                        name="busqueda"
-                        value={busqueda}
-                        onChange={(e) => setBusqueda(e.target.value)}
-                        placeholder={PLACEHOLDER[campo]}
-                        autoFocus
-                        sx={{ width: "100%", bgcolor: "#fff", borderRadius: 2, pr: 0 }}
-                    />
-                </Box>
-
-                <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.95)", fontWeight: 600, whiteSpace: "nowrap" }}>
-                    {resultados.length} de {TOTAL_INTERNOS} internos
-                </Typography>
-            </Box>
+                }
+            >
+                <HeaderPills options={CAMPOS} value={campo} onChange={setCampo} />
+                <HeaderField
+                    id="contactos-busqueda"
+                    name="busqueda"
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    placeholder={PLACEHOLDER[campo]}
+                    autoFocus
+                />
+            </PageHeader>
 
             <Box sx={{ ...panelSx, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
                 {/* Tags de dependencias, agrupadas por área */}

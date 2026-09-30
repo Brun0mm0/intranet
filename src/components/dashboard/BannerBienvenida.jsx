@@ -3,10 +3,13 @@ import { useAuth } from "../../auth";
 import { useReloj } from "../../hooks/useReloj";
 import { useClima } from "../../hooks/useClima";
 import { CIUDADES } from "../../config/ciudades";
+import PageHeader from "../common/PageHeader";
 
 const TZ = "America/Argentina/Buenos_Aires";
+const suave = { color: "rgba(255,255,255,0.92)" };
 
-// Único bloque con color de marca en el inicio: saludo, hora y clima.
+// Banner de bienvenida del inicio: saludo, hora y clima.
+// Usa PageHeader para tener la misma altura que los encabezados del resto de las páginas.
 export default function BannerBienvenida({ ciudad = "buenos-aires", sx }) {
     const { user } = useAuth();
     const ahora = useReloj();
@@ -17,62 +20,48 @@ export default function BannerBienvenida({ ciudad = "buenos-aires", sx }) {
     const fecha = ahora.toLocaleDateString("es-AR", { timeZone: TZ, weekday: "long", day: "numeric", month: "long" });
 
     return (
-        <Box
-            sx={{
-                borderRadius: 3,
-                px: 3,
-                py: 2.5,
-                color: "#fff",
-                backgroundImage: "linear-gradient(110deg, #0092c0 0%, #00a9da 45%, #02b57e 100%)",
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 2,
-                ...sx,
-            }}
-        >
-            <Box minWidth={0}>
-                <Typography variant="h4" fontWeight={700} color="inherit">
+        <PageHeader sx={sx}>
+            <Box flex={1} minWidth={0}>
+                <Typography variant="h5" fontWeight={700} color="inherit" noWrap lineHeight={1.25}>
                     Hola, {user?.usuario ?? "bienvenido"}
                 </Typography>
-                <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                <Typography variant="body2" sx={suave} noWrap>
                     Bienvenido a la intranet de Servicios Sociales Bancarios
                 </Typography>
             </Box>
 
-            <Stack direction="row" alignItems="center" spacing={3}>
+            <Stack direction="row" alignItems="center" spacing={2.5} flexShrink={0}>
                 <Box textAlign="right">
-                    <Typography variant="h3" fontWeight={700} color="inherit" lineHeight={1} sx={{ fontVariantNumeric: "tabular-nums" }}>
+                    <Typography variant="h4" fontWeight={700} color="inherit" lineHeight={1.1} sx={{ fontVariantNumeric: "tabular-nums" }}>
                         {hora}
                     </Typography>
-                    <Typography variant="body2" textTransform="capitalize" sx={{ opacity: 0.9 }}>
+                    <Typography variant="body2" textTransform="capitalize" sx={suave}>
                         {fecha}
                     </Typography>
                 </Box>
 
-                <Box sx={{ width: "1px", alignSelf: "stretch", bgcolor: "rgba(255,255,255,0.4)" }} />
+                <Box sx={{ width: "1px", height: 44, bgcolor: "rgba(255,255,255,0.4)" }} />
 
                 <Box textAlign="right" minWidth={110}>
                     {loading && <CircularProgress size={24} sx={{ color: "#fff" }} />}
                     {!loading && (error || !clima) && (
-                        <Typography variant="body2" sx={{ opacity: 0.9 }}>Clima no disponible</Typography>
+                        <Typography variant="body2" sx={suave}>Clima no disponible</Typography>
                     )}
                     {!loading && clima && (
                         <>
-                            <Stack direction="row" alignItems="center" justifyContent="flex-end" spacing={1}>
-                                <Typography variant="h5" component="span" aria-hidden>{clima.icon}</Typography>
-                                <Typography variant="h4" fontWeight={700} color="inherit" lineHeight={1}>
+                            <Stack direction="row" alignItems="center" justifyContent="flex-end" spacing={0.75}>
+                                <Typography variant="h6" component="span" aria-hidden lineHeight={1.1}>{clima.icon}</Typography>
+                                <Typography variant="h5" fontWeight={700} color="inherit" lineHeight={1.1}>
                                     {Math.round(clima.temperatura)}°C
                                 </Typography>
                             </Stack>
-                            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                            <Typography variant="body2" sx={suave} noWrap>
                                 {config?.label} · {clima.desc}
                             </Typography>
                         </>
                     )}
                 </Box>
             </Stack>
-        </Box>
+        </PageHeader>
     );
 }

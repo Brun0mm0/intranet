@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Button, Chip, CircularProgress, Dialog, DialogContent, IconButton, Stack, Typography } from '@mui/material'
+import { Box, Chip, CircularProgress, Dialog, DialogContent, IconButton, Stack, Typography } from '@mui/material'
 import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded'
 import PersonAddAlt1RoundedIcon from '@mui/icons-material/PersonAddAlt1Rounded'
 import CloseIcon from '@mui/icons-material/Close'
@@ -7,13 +7,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchUsuarios, fetchActualizarRol } from '../../store/admin/thunk'
 import { CrearUsuariosComponent } from './components/CrearUsuariosComponent'
 import { ListaUsuariosComponent } from './components/ListaUsuariosComponent'
-import { SearchInput } from '../../components/inputs/SearchInput'
+import PageHeader, { HeaderButton, HeaderField } from '../../components/common/PageHeader'
 import PageContainer from '../../components/common/PageContainer'
-import { panelSx } from '../../shared-theme/customizations/intranetStyles'
+import { BANNER_BG, panelSx } from '../../shared-theme/customizations/intranetStyles'
 import { MARINO } from '../../shared-theme/customizations/dataGrid'
 import { ROLES } from './roles'
-
-const BANNER_BG = 'linear-gradient(110deg, #0092c0 0%, #00a9da 45%, #02b57e 100%)'
 
 export const AdminPage = () => {
   const dispatch = useDispatch()
@@ -70,54 +68,25 @@ export const AdminPage = () => {
 
   return (
     <PageContainer>
-      {/* Barra con el degradado del banner: búsqueda + alta de usuario */}
-      <Box
-        sx={{
-          backgroundImage: BANNER_BG,
-          borderRadius: 3,
-          px: 2.5,
-          py: 1.5,
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2.5,
-          flexWrap: 'wrap',
-        }}
+      {/* Encabezado institucional: búsqueda + alta de usuario */}
+      <PageHeader
+        icon={<AdminPanelSettingsRoundedIcon />}
+        title="Usuarios"
+        actions={
+          <HeaderButton variante="blanco" startIcon={<PersonAddAlt1RoundedIcon />} onClick={() => setModalAbierto(true)}>
+            Nuevo usuario
+          </HeaderButton>
+        }
       >
-        <Stack direction="row" alignItems="center" spacing={1} flexShrink={0}>
-          <AdminPanelSettingsRoundedIcon />
-          <Typography variant="h6" fontWeight={700} color="inherit" noWrap>
-            Usuarios
-          </Typography>
-        </Stack>
-
-        <Box flex={1} minWidth={260} maxWidth={480}>
-          <SearchInput
-            name="busqueda-usuarios"
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            placeholder="Buscar por usuario, email o CUIL"
-            sx={{ width: '100%', bgcolor: '#fff', borderRadius: 2, pr: 0 }}
-          />
-        </Box>
-
-        <Button
-          startIcon={<PersonAddAlt1RoundedIcon />}
-          onClick={() => setModalAbierto(true)}
-          sx={{
-            ml: 'auto',
-            bgcolor: '#fff',
-            color: '#0079a0',
-            fontWeight: 700,
-            textTransform: 'none',
-            px: 2.5,
-            border: 0,
-            '&:hover': { bgcolor: '#eaf7fc' },
-          }}
-        >
-          Nuevo usuario
-        </Button>
-      </Box>
+        <HeaderField
+          id="usuarios-busqueda"
+          name="busqueda-usuarios"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          placeholder="Buscar por usuario, email o CUIL"
+          boxSx={{ maxWidth: 480 }}
+        />
+      </PageHeader>
 
       <Box sx={{ ...panelSx, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {usuarios.length > 0 && (

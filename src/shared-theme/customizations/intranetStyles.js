@@ -14,3 +14,9 @@ export const panelSx = {
     border: 1,
     borderColor: "#e1e8eb",
 };
+
+// Degradado institucional (banner de bienvenida, encabezados de página, encabezados de modales)
+export const BANNER_BG = "linear-gradient(110deg, #0092c0 0%, #00a9da 45%, #02b57e 100%)";
+
+// Altura común de los encabezados de página (en pantallas angostas pasa a ser mínima)
+export const PAGE_HEADER_HEIGHT = 88;
