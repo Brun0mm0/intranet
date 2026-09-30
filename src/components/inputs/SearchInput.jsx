@@ -31,14 +31,26 @@ export const SearchInput = ({
         }
         endAdornment={
             clearable && value ? (
-                <InputAdornment position='end'>
+                <InputAdornment position='end' sx={{ mr: 0.75 }}>
+                    {/* Botón chico, redondo y sin borde: el estilo global de IconButton (cuadrado con borde) lo hacía parecer un botón aparte */}
                     <IconButton
-                        aria-label='Limpiar'
+                        aria-label='Borrar búsqueda'
+                        title='Borrar'
                         onClick={handleClear}
-                        edge='end'
+                        // Mantiene el foco en el campo para seguir escribiendo después de borrar
+                        onMouseDown={(e) => e.preventDefault()}
                         size='small'
+                        sx={{
+                            width: 26,
+                            height: 26,
+                            border: 'none',
+                            borderRadius: '50%',
+                            bgcolor: 'transparent',
+                            color: 'text.secondary',
+                            '&:hover': { bgcolor: 'action.hover', color: 'text.primary' },
+                        }}
                     >
-                        <CloseRoundedIcon fontSize='small'/>
+                        <CloseRoundedIcon sx={{ fontSize: 18 }}/>
                     </IconButton>
                 </InputAdornment>
             ) : null
