@@ -4,11 +4,17 @@ import { delay } from "../utils/utils";
 import { reset as ResetPadron } from "../store/padrones/padronSlice";
 import { reset as ResetAfiliacion } from "../store/afiliaciones/afiliacionesSlice";
 // import { logout } from '../auth/useAuth';
-const DEV_BYPASS_AUTH = import.meta.env.VITE_DEV_BYPASS_AUTH === 'false';
+// ✅ Antes comparaba contra 'false' (invertido respecto de AuthProvider).
+const DEV_BYPASS_AUTH = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
+
+// URL de la API según el entorno:
+// - desarrollo: VITE_API_URL en .env.development.local (no se sube al repo)
+// - producción: si no hay variable, '/api' (mismo servidor que sirve la app)
+// ✅ Antes estaba fija la del servidor de desarrollo y había que cambiarla a mano antes de cada build.
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const intranetApi = axios.create({
-    // baseURL: '/api',   //PROD
-    baseURL: 'http://130.130.2.53:9096/',
+    baseURL: API_URL,
     withCredentials: true,
     timeout: 10000,
   headers: {
