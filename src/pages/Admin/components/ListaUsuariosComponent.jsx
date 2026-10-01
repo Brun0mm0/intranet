@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
-  Box, Stack, Table, TableBody, MenuItem, TableCell, TableContainer, TableHead, TableRow, Select, TablePagination, Typography,
+  Box, IconButton, Stack, Table, TableBody, MenuItem, TableCell, TableContainer, TableHead, TableRow, Select, TablePagination, Tooltip, Typography,
 } from '@mui/material'
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded'
+import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded'
 import { ROLES, ROLES_IDS } from '../roles'
 import { formatCuilTexto } from '../../../utils/utils'
 import { tableHeadSx } from '../../../shared-theme/customizations/dataGrid'
@@ -15,6 +17,31 @@ const columns = [
 ];
 
 const iniciales = (nombre = '') => nombre.slice(0, 2).toUpperCase();
+
+// 🔹 Contraseña oculta por defecto; el botón del ojo la muestra solo en esa fila.
+// ⚠️ Esto la oculta en pantalla, pero el backend la sigue enviando en texto plano: pendiente de revisar.
+function CeldaContrasena({ valor, usuario }) {
+  const [visible, setVisible] = useState(false);
+  if (!valor) return <Box component="span" sx={{ color: '#8a979d' }}>—</Box>;
+  return (
+    <Stack direction="row" alignItems="center" spacing={0.5}>
+      <Box component="span" sx={{ fontFamily: visible ? 'inherit' : 'monospace', letterSpacing: visible ? 0 : '0.1em', minWidth: 90 }}>
+        {visible ? valor : '••••••••'}
+      </Box>
+      <Tooltip title={visible ? 'Ocultar contraseña' : 'Ver contraseña'}>
+        <IconButton
+          size="small"
+          aria-label={`${visible ? 'Ocultar' : 'Ver'} contraseña de ${usuario}`}
+          aria-pressed={visible}
+          onClick={() => setVisible((v) => !v)}
+          sx={{ width: 28, height: 28, border: 'none', borderRadius: '50%', bgcolor: 'transparent', color: 'text.secondary', '&:hover': { bgcolor: 'action.hover', color: '#0079a0' } }}
+        >
+          {visible ? <VisibilityOffRoundedIcon sx={{ fontSize: 18 }} /> : <VisibilityRoundedIcon sx={{ fontSize: 18 }} />}
+        </IconButton>
+      </Tooltip>
+    </Stack>
+  );
+}
 
 function RolDot({ rolId }) {
   return <Box component="span" sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: ROLES[rolId]?.color ?? '#8a979d', flexShrink: 0 }} />;
@@ -78,8 +105,9 @@ export const ListaUsuariosComponent = ({ usuarios, onCambioRol, filaPendiente })
                       <Typography variant="body2" fontWeight={700}>{usuario.NombreUsuario}</Typography>
                     </Stack>
                   </TableCell>
-                  {/* Contraseña: sin cambios por ahora (pendiente de revisar) */}
-                  <TableCell>{usuario.Contrasena}</TableCell>
+                  <TableCell>
+                    <CeldaContrasena valor={usuario.Contrasena} usuario={usuario.NombreUsuario} />
+                  </TableCell>
                   <TableCell>{usuario.Email}</TableCell>
                   <TableCell sx={{ fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{formatCuilTexto(usuario.cuil) ?? '—'}</TableCell>
                   <TableCell>
